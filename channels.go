@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/ra-company/logging"
 )
 
 // ChannelItem represents a single channel in the Chat2Desk API
@@ -53,7 +51,7 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 
 	data, err := dst.doRequest(ctx, "GET", url, nil)
 	if err != nil {
-		logging.Logs.Errorf(ctx, "Failed to get channels: %v", err)
+		dst.Error(ctx, fmt.Sprintf("Failed to get channels: %v", err))
 		return nil, err
 	}
 
@@ -61,7 +59,7 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 
 	err = json.Unmarshal(data, &response)
 	if err != nil {
-		logging.Logs.Errorf(ctx, "Failed to unmarshal channels response: %v", err)
+		dst.Error(ctx, fmt.Sprintf("Failed to unmarshal channels response: %v", err))
 		return nil, ErrorInvalidResponse
 	}
 
@@ -90,12 +88,12 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) (*[]ChannelItem, error) {
 	response, err := dst.Channels(ctx, offset, limit)
 	if err != nil {
-		logging.Logs.Errorf(ctx, "Failed to get channels: %v", err)
+		dst.Error(ctx, fmt.Sprintf("Failed to get channels: %v", err))
 		return nil, err
 	}
 
 	if response.Status != "success" {
-		logging.Logs.Errorf(ctx, "Invalid response status: %s", response.Status)
+		dst.Error(ctx, fmt.Sprintf("Invalid response status: %s", response.Status))
 		return nil, ErrorInvalidResponse
 	}
 
