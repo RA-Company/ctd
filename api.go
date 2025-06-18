@@ -18,30 +18,6 @@ var (
 	ErrorInvalidToken    = fmt.Errorf("invalid token")
 )
 
-// Logger supports logging at various log levels.
-type Logger interface {
-	// Debug logs a message at Debug level.
-	// The first argument is the context for the log entry,
-	Debug(args ...any)
-
-	// Info logs a message at Info level.
-	// The first argument is the context for the log entry,
-	Info(args ...any)
-
-	// Warn logs a message at Warning level.
-	// The first argument is the context for the log entry,
-	Warn(args ...any)
-
-	// Error logs a message at Error level.
-	// The first argument is the context for the log entry,
-	Error(args ...any)
-
-	// Fatal logs a message at Fatal level
-	// and process will exit with status set to 1.
-	// The first argument is the context for the log entry,
-	Fatal(args ...any)
-}
-
 // MetaResponse provides metadata about the response,
 // including total count, limit, and offset.
 // It is used to provide pagination information.
@@ -55,10 +31,10 @@ type MetaResponse struct {
 }
 
 type Ctd struct {
+	logging.CustomLogger
 	Url     string
 	Token   string
 	Timeout uint
-	Logger  Logger
 }
 
 // Init initializes the Ctd instance with the provided URL and token.
@@ -259,71 +235,4 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 	}
 
 	return body, nil
-}
-
-// SetLogger sets the logger for the Ctd instance.
-// This allows for custom logging behavior or fallback to the default logging mechanism.
-// It is useful for integrating with different logging frameworks or for testing purposes.
-//
-// Parameters:
-//   - logger: An instance of Logger interface to handle logging.
-func (dst *Ctd) SetLogger(logger Logger) {
-	dst.Logger = logger
-}
-
-// Debug logs a debug message using the provided logger or the default logging mechanism.
-// It is useful for debugging purposes and can be used to log detailed information about the API calls
-// and their responses.
-//
-// Parameters:
-//   - ctx: The context for the logging operation, allowing for cancellation and timeouts.
-//   - text: The debug message to log.
-func (dst *Ctd) Debug(ctx context.Context, text string) {
-	if dst.Logger != nil {
-		dst.Logger.Debug(ctx, text)
-	} else {
-		logging.Logs.Debugf(ctx, text)
-	}
-}
-
-// Info logs an informational message using the provided logger or the default logging mechanism.
-// It is useful for logging general information about the API calls and their responses.
-//
-// Parameters:
-//   - ctx: The context for the logging operation, allowing for cancellation and timeouts.
-//   - text: The informational message to log.
-func (dst *Ctd) Info(ctx context.Context, text string) {
-	if dst.Logger != nil {
-		dst.Logger.Info(ctx, text)
-	} else {
-		logging.Logs.Infof(ctx, text)
-	}
-}
-
-// Warn logs a warning message using the provided logger or the default logging mechanism.
-// It is useful for logging potential issues or unexpected behavior in the API calls.
-//
-// Parameters:
-//   - ctx: The context for the logging operation, allowing for cancellation and timeouts.
-//   - text: The warning message to log.
-func (dst *Ctd) Warn(ctx context.Context, text string) {
-	if dst.Logger != nil {
-		dst.Logger.Warn(ctx, text)
-	} else {
-		logging.Logs.Warnf(ctx, text)
-	}
-}
-
-// Error logs an error message using the provided logger or the default logging mechanism.
-// It is useful for logging errors encountered during API calls or other operations.
-//
-// Parameters:
-//   - ctx: The context for the logging operation, allowing for cancellation and timeouts.
-//   - text: The error message to log.
-func (dst *Ctd) Error(ctx context.Context, text string) {
-	if dst.Logger != nil {
-		dst.Logger.Error(ctx, text)
-	} else {
-		logging.Logs.Errorf(ctx, text)
-	}
 }

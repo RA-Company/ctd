@@ -47,11 +47,11 @@ type ChannelsResponse struct {
 //   - A pointer to a ChannelsResponse struct containing the list of channels and metadata.
 //   - An error if the request fails or if the response is invalid.
 func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsResponse, error) {
-	url := fmt.Sprintf("%s/v1/channels?offset=%d&limit=%d", dst.Url, offset, limit)
+	url := fmt.Sprintf("%sv1/channels?offset=%d&limit=%d", dst.Url, offset, limit)
 
 	data, err := dst.doRequest(ctx, "GET", url, nil)
 	if err != nil {
-		dst.Error(ctx, fmt.Sprintf("Failed to get channels: %v", err))
+		dst.Error(ctx, "Failed to get channels: %v", err)
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 
 	err = json.Unmarshal(data, &response)
 	if err != nil {
-		dst.Error(ctx, fmt.Sprintf("Failed to unmarshal channels response: %v", err))
+		dst.Error(ctx, "Failed to unmarshal channels response: %v", err)
 		return nil, ErrorInvalidResponse
 	}
 
@@ -88,12 +88,12 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) (*[]ChannelItem, error) {
 	response, err := dst.Channels(ctx, offset, limit)
 	if err != nil {
-		dst.Error(ctx, fmt.Sprintf("Failed to get channels: %v", err))
+		dst.Error(ctx, "Failed to get channels: %v", err)
 		return nil, err
 	}
 
 	if response.Status != "success" {
-		dst.Error(ctx, fmt.Sprintf("Invalid response status: %s", response.Status))
+		dst.Error(ctx, "Invalid response status: %s", response.Status)
 		return nil, ErrorInvalidResponse
 	}
 

@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/ra-company/env v1.0.1
-	github.com/ra-company/logging v1.0.2
+	github.com/ra-company/logging v1.0.5
 	github.com/stretchr/testify v1.10.0
 )
 
