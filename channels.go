@@ -2,7 +2,6 @@ package ctd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 )
 
@@ -49,19 +48,19 @@ type ChannelsResponse struct {
 func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsResponse, error) {
 	url := fmt.Sprintf("%sv1/channels?offset=%d&limit=%d", dst.Url, offset, limit)
 
-	data, err := dst.doRequest(ctx, "GET", url, nil)
+	response := ChannelsResponse{}
+
+	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
 		dst.Error(ctx, "Failed to get channels: %v", err)
 		return nil, err
 	}
 
-	response := ChannelsResponse{}
-
-	err = json.Unmarshal(data, &response)
+	/*err = json.Unmarshal(data, &response)
 	if err != nil {
 		dst.Error(ctx, "Failed to unmarshal channels response: %v", err)
 		return nil, ErrorInvalidResponse
-	}
+	}*/
 
 	return &response, nil
 }

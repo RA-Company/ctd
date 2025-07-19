@@ -14,8 +14,10 @@ import (
 )
 
 var (
-	ErrorInvalidResponse = fmt.Errorf("invalid response")
-	ErrorInvalidToken    = fmt.Errorf("invalid token")
+	ErrorInvalidResponse         = fmt.Errorf("invalid response")
+	ErrorInvalidToken            = fmt.Errorf("invalid token")
+	ErrorWebhookUrlIsAlreadyUsed = fmt.Errorf("webhook URL is already used")
+	ErrorInvalidID               = fmt.Errorf("invalid ID")
 )
 
 // MetaResponse provides metadata about the response,
@@ -67,19 +69,19 @@ func (dst *Ctd) Init(url string, token string) {
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//
-// -path: The path to the specific API endpoint to retrieve data from.
+//   - path: The path to the specific API endpoint to retrieve data from.
+//   - response: A pointer to a struct where the response data will be unmarshaled.
 //
 // Returns:
 //   - A byte slice containing the response data from the API.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) Get(ctx context.Context, path string) ([]byte, error) {
+func (dst *Ctd) Get(ctx context.Context, path string, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "GET", url, nil)
+	result, err := dst.doRequest(ctx, "GET", url, nil, response)
 	if err != nil {
 		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "GET", url, nil)
+			result, err = dst.doRequest(ctx, "GET", url, nil, response)
 		}
 	}
 	return result, err
@@ -94,20 +96,20 @@ func (dst *Ctd) Get(ctx context.Context, path string) ([]byte, error) {
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//
-// - path: The path to the specific API endpoint to send data to.
+//   - path: The path to the specific API endpoint to send data to.
 //   - data: The data to be sent in the request body, which can be of any type (string, byte slice, or struct).
+//   - response: A pointer to a struct where the response data will be unmarshaled.
 //
 // Returns:
 //   - A byte slice containing the response data from the API.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) Post(ctx context.Context, path string, data any) ([]byte, error) {
+func (dst *Ctd) Post(ctx context.Context, path string, data any, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "POST", url, data)
+	result, err := dst.doRequest(ctx, "POST", url, data, response)
 	if err != nil {
 		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "POST", url, data)
+			result, err = dst.doRequest(ctx, "POST", url, data, response)
 		}
 	}
 	return result, err
@@ -124,17 +126,18 @@ func (dst *Ctd) Post(ctx context.Context, path string, data any) ([]byte, error)
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - path: The path to the specific API endpoint to send data to.
 //   - data: The data to be sent in the request body, which can be of any type (string, byte slice, or struct).
+//   - response: A pointer to a struct where the response data will be unmarshaled.
 //
 // Returns:
 //   - A byte slice containing the response data from the API.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) Put(ctx context.Context, path string, data any) ([]byte, error) {
+func (dst *Ctd) Put(ctx context.Context, path string, data any, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "PUT", url, data)
+	result, err := dst.doRequest(ctx, "PUT", url, data, response)
 	if err != nil {
 		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "PUT", url, data)
+			result, err = dst.doRequest(ctx, "PUT", url, data, response)
 		}
 	}
 	return result, err
@@ -150,17 +153,18 @@ func (dst *Ctd) Put(ctx context.Context, path string, data any) ([]byte, error) 
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - path: The path to the specific API endpoint to delete data from.
+//   - response: A pointer to a struct where the response data will be unmarshaled.
 //
 // Returns:
 //   - A byte slice containing the response data from the API.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) Delete(ctx context.Context, path string) ([]byte, error) {
+func (dst *Ctd) Delete(ctx context.Context, path string, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "DELETE", url, nil)
+	result, err := dst.doRequest(ctx, "DELETE", url, nil, response)
 	if err != nil {
 		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "DELETE", url, nil)
+			result, err = dst.doRequest(ctx, "DELETE", url, nil, response)
 		}
 	}
 	return result, err
@@ -183,7 +187,7 @@ func (dst *Ctd) Delete(ctx context.Context, path string) ([]byte, error) {
 // Returns:
 //   - A byte slice containing the response data from the API.
 //   - An error if the request fails, if the response is invalid, or if the response indicates an invalid token.
-func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payload any) ([]byte, error) {
+func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payload any, response any) ([]byte, error) {
 	start := time.Now()
 	client := &http.Client{
 		Timeout: time.Duration(dst.Timeout) * time.Second,
@@ -232,6 +236,12 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 
 	if strings.Contains(string(body), "Token is not correct") {
 		return nil, ErrorInvalidToken
+	}
+
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		dst.Error(ctx, "Failed to unmarshal response (%s): %v", body, err)
+		return body, ErrorInvalidResponse
 	}
 
 	return body, nil
