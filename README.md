@@ -15,7 +15,7 @@ Chat2Desk API functions
 To update library to the latest version, use go get -u github.com/ra-company/ctd.
 
 # Supported go versions
-We currently support the most recent major Go versions from 1.24.3 onward.
+We currently support the most recent major Go versions from 1.24.5 onward.
 
 # License
 This project is licensed under the terms of the GPL-3.0 license.

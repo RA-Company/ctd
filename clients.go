@@ -121,10 +121,6 @@ func (dst *Ctd) APIGetClients(ctx context.Context, offset, limit int, order, par
 		dst.Error(ctx, "Failed to get clients: %v", err)
 		return nil, err
 	}
-	if response.Status != "success" {
-		dst.Error(ctx, "Failed to get clients: %s", response.Errors)
-		return nil, ErrorInvalidID
-	}
 	return &response, nil
 }
 
