@@ -46,7 +46,7 @@ type Ctd struct {
 // that the Ctd instance is properly configured with the necessary
 // URL and authentication token.
 //
-// // Parameters:
+// Parameters:
 //   - url: The base URL of the Chat2Desk API, which should end with a slash.
 //   - token: The authentication token for the Chat2Desk API, used
 func (dst *Ctd) Init(url string, token string) {
