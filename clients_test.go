@@ -2,14 +2,17 @@ package ctd
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/ra-company/env"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCtd_Clients(t *testing.T) {
 	ctx := context.Background()
+	faker := gofakeit.New(0)
 
 	url, token := getCredentials(t)
 
@@ -86,4 +89,79 @@ func TestCtd_Clients(t *testing.T) {
 		require.Equal(t, total, total2, "dst.GetClientsList() should return the same total count on both calls")
 		require.NotEqual(t, got, got2, "dst.GetClientsList() should return different data on different calls with different offsets")
 	})
+
+	type createClient struct {
+		Phone         string `json:"phone"`
+		Transport     string `json:"transport"`
+		ChannelID     int    `json:"channel_id"`
+		Nickname      string `json:"nickname"`
+		AssignedPhone string `json:"assigned_phone"`
+	}
+
+	transport := env.GetEnvStr("API_TRANSPORT", "")
+	if transport == "" {
+		t.Skip("API_TRANSPORT is not set, skipping create client tests")
+	}
+
+	channel := env.GetEnvInt("API_CHANNEL_ID", 0)
+	if channel == 0 {
+		t.Skip("API_CHANNEL_ID is not set, skipping create client tests")
+	}
+
+	createTests := []struct {
+		name   string
+		token  string
+		client createClient
+		isData bool
+		error  error
+	}{
+		{
+			name:  "Create client with incorrect token",
+			token: "incorrect_token",
+			client: createClient{
+				Phone:         fmt.Sprintf("%d", faker.IntRange(10000000, 20000000)),
+				Transport:     transport,
+				ChannelID:     channel,
+				Nickname:      faker.Name(),
+				AssignedPhone: faker.Phone(),
+			},
+			isData: false,
+			error:  ErrorInvalidToken,
+		},
+		{
+			name:  "Create client with correct token",
+			token: token,
+			client: createClient{
+				Phone:         fmt.Sprintf("%d", faker.IntRange(10000000, 20000000)),
+				Transport:     transport,
+				ChannelID:     channel,
+				Nickname:      faker.Name(),
+				AssignedPhone: faker.Phone(),
+			},
+			isData: true,
+			error:  nil,
+		},
+	}
+
+	for _, tt := range createTests {
+		t.Run(tt.name, func(t *testing.T) {
+			dst := &Ctd{}
+			dst.Init(url, tt.token)
+
+			got, err := dst.CreateClient(ctx, tt.client.Phone, tt.client.Transport, tt.client.ChannelID, tt.client.Nickname, tt.client.AssignedPhone)
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error, "dst.CreateClient() error")
+			} else {
+				require.NoError(t, err, "dst.CreateClient() should not return an error")
+			}
+			if tt.isData {
+				require.NotNil(t, got, "dst.CreateClient() should return data")
+				require.Equal(t, tt.client.Phone, got.Phone, "dst.CreateClient() should return client with correct phone")
+				require.Equal(t, tt.client.Nickname, got.AssignedName, "dst.CreateClient() should return client with correct nickname")
+				require.Equal(t, tt.client.AssignedPhone, got.ClientPhone, "dst.CreateClient() should return client with correct assigned phone")
+			} else {
+				require.Nil(t, got, "dst.CreateClient() should return nil data on error")
+			}
+		})
+	}
 }

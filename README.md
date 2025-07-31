@@ -113,6 +113,32 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
+```func (*Ctd).APICreateClient(ctx *context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APICreateClient creates a new client in the Chat2Desk API.
+It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
+It constructs the API endpoint URL, prepares the data to be sent in the request,
+sends a POST request to the API, and returns the response data as a pointer to ClientsResponse
+struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the ClientsResponse struct containing the new client data.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - phone: The phone number of the client to be created.
+  - transport: The transport type for the client (e.g., "whatsapp", "telegram").
+  - channel_id: The ID of the channel associated with the client.
+  - nickname: The nickname of the client (optional).
+  - assigned_phone: The assigned phone number for the client (optional).
+
+Returns:
+  - A pointer to a ClientsResponse struct containing the new client data.
+  - An error if the request fails or if the response is invalid.
+</details>
+
 ```func (*Ctd).GetClient(ctx context.Context, id int) (*ClientItem, error)```
 
 <details>
@@ -152,6 +178,30 @@ Returns:
   - A pointer to a slice of ClientItem containing the clients.
   - The total number of clients available (for pagination).
   - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).CreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientItem, error)```
+
+<details>
+<summary>Function description</summary>
+
+CreateClient creates a new client in the Chat2Desk API.
+It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
+It calls the APICreateClient method to create the client and handles errors.
+If the response status is not "success", it sets the last error and returns an error.
+If the client is created successfully, it returns a pointer to the ClientItem struct containing the client details.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - phone: The phone number of the client to be created.
+  - transport: The transport type for the client (e.g., "whatsapp", "telegram").
+  - channel_id: The ID of the channel to which the client belongs.
+  - nickname: The nickname of the client (optional).
+  - assigned_phone: The phone number assigned to the client (optional).
+
+Returns:
+  - A pointer to a ClientItem struct containing the client details.
+  - An error if the request fails, if the response is invalid, or if the client could not be created.
 </details>
 
 </details>
@@ -513,6 +563,7 @@ Returns:
 * https://github.com/ra-company/env - Simple environment library (GPL-3.0 license)
 * https://github.com/ra-company/logging - Simple logging library (GPL-3.0 license)
 * https://github.com/stretchr/testify - Module for tests (MIT License)
+* https://github.com/brianvoe/gofakeit/ - Random data generator written in go (MIT License)
 
 # Staying up to date
 To update library to the latest version, use go get -u github.com/ra-company/ctd.

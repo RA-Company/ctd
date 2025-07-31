@@ -10,7 +10,7 @@ import (
 type ClientResponse struct {
 	Data    ClientItem `json:"data"` // Data: List of clients
 	Message string     `json:"message"`
-	Errors  string     `json:"errors,omitempty"` // Errors: List of errors,
+	Errors  any        `json:"errors,omitempty"` // Errors: List of errors,
 	Status  string     `json:"status"`
 }
 
@@ -124,6 +124,49 @@ func (dst *Ctd) APIGetClients(ctx context.Context, offset, limit int, order, par
 	return &response, nil
 }
 
+// APICreateClient creates a new client in the Chat2Desk API.
+// It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
+// It constructs the API endpoint URL, prepares the data to be sent in the request,
+// sends a POST request to the API, and returns the response data as a pointer to ClientsResponse
+// struct.
+// If an error occurs during the request, it logs the error and returns it.
+// If the request is successful, it returns a pointer to the ClientsResponse struct containing the new client data.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - phone: The phone number of the client to be created.
+//   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
+//   - channel_id: The ID of the channel associated with the client.
+//   - nickname: The nickname of the client (optional).
+//   - assigned_phone: The assigned phone number for the client (optional).
+//
+// Returns:
+//   - A pointer to a ClientsResponse struct containing the new client data.
+//   - An error if the request fails or if the response is invalid.
+func (dst *Ctd) APICreateClient(ctx *context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientResponse, error) {
+	url := fmt.Sprintf("%sv1/clients", dst.Url)
+	data := map[string]any{
+		"phone":      phone,
+		"transport":  transport,
+		"channel_id": channel_id,
+	}
+	if nickname != "" {
+		data["nickname"] = nickname
+	}
+	if assigned_phone != "" {
+		data["assigned_phone"] = assigned_phone
+	}
+
+	response := ClientResponse{}
+	_, err := dst.doRequest(*ctx, "POST", url, data, &response)
+	if err != nil {
+		dst.Error(*ctx, "Failed to create client: %v", err)
+		return nil, err
+	}
+
+	return &response, nil
+}
+
 // GetClient retrieves a client by its ID from the Chat2Desk API.
 // It takes a context and the client ID as parameters.
 // It calls the APIGetClient method to fetch the client data.
@@ -143,7 +186,7 @@ func (dst *Ctd) GetClient(ctx context.Context, id int) (*ClientItem, error) {
 		return nil, err
 	}
 
-	if strings.Contains(response.Errors, " not found") {
+	if strings.Contains(fmt.Sprintf("%v", response.Errors), " not found") {
 		return nil, ErrorInvalidID
 	}
 
@@ -183,4 +226,34 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) (*[]Clien
 	}
 
 	return &response.Data, response.Meta.Total, nil
+}
+
+// CreateClient creates a new client in the Chat2Desk API.
+// It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
+// It calls the APICreateClient method to create the client and handles errors.
+// If the response status is not "success", it sets the last error and returns an error.
+// If the client is created successfully, it returns a pointer to the ClientItem struct containing the client details.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - phone: The phone number of the client to be created.
+//   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
+//   - channel_id: The ID of the channel to which the client belongs.
+//   - nickname: The nickname of the client (optional).
+//   - assigned_phone: The phone number assigned to the client (optional).
+//
+// Returns:
+//   - A pointer to a ClientItem struct containing the client details.
+//   - An error if the request fails, if the response is invalid, or if the client could not be created.
+func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientItem, error) {
+	response, err := dst.APICreateClient(&ctx, phone, transport, channel_id, nickname, assigned_phone)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Status != "success" {
+		dst.lastError = response.Errors
+		return nil, ErrorInvalidResponse
+	}
+	return &response.Data, nil
 }

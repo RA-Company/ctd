@@ -34,9 +34,10 @@ type MetaResponse struct {
 
 type Ctd struct {
 	logging.CustomLogger
-	Url     string
-	Token   string
-	Timeout uint
+	Url       string
+	Token     string
+	Timeout   uint
+	lastError any // Last error encountered during API requests
 }
 
 // Init initializes the Ctd instance with the provided URL and token.
@@ -245,4 +246,14 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 	}
 
 	return body, nil
+}
+
+// LastError returns the last error encountered during API requests.
+// This method is useful for retrieving the last error that occurred,
+// allowing for error handling or logging in the application.
+//
+// Returns:
+//   - The last error encountered during API requests, or nil if no error occurred.
+func (dst *Ctd) LastError() any {
+	return dst.lastError
 }
