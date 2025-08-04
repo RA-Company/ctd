@@ -45,17 +45,8 @@ type ClientItem struct {
 	ClientExternalID      string            `json:"client_external_id"`   // ClientExternalID: External ID of the client
 	ExtrnalID             int               `json:"external_id"`          // ExternalID: External ID of the client
 	ExtrnalIDs            map[string]int    `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client
-	Channels              []struct {
-		ID         int      `json:"id"`         // ID: Unique identifier of the channel
-		Transports []string `json:"transports"` // Transports: List of transports used by the channel
-	} `json:"channels"` // Channels: List of channels associated with the client
-	Tags []struct {
-		ID          int    `json:"id"`          // ID: Unique identifier of the tag
-		Label       string `json:"label"`       // Label: Label of the tag
-		Description string `json:"description"` // Description: Description of the tag
-		GroupID     int    `json:"group_id"`    // GroupID: ID of the group associated with the tag
-		GroupName   string `json:"group_name"`  // GroupName: Name of the group associated with the tag
-	} `json:"tags"` // Tags: List of tags associated with the client
+	Channels              []ChannelItem     `json:"channels"`             // Channels: List of channels associated with the client
+	Tags                  []TagItem         `json:"tags"`                 // Tags: List of tags associated with the client
 }
 
 // APIGetClient retrieves a client by its ID from the Chat2Desk API.

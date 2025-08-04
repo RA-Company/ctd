@@ -9,10 +9,10 @@ import (
 // with its ID, name, phone number, and transports.
 // It is used in the ChannelsResponse to provide a list of channels.
 type ChannelItem struct {
-	ID         int      `json:"id"`         // ID: Unique identifier of the channel
-	Name       string   `json:"name"`       // Name: Name of the channel
-	Phone      string   `json:"phone"`      // Phone: Phone number associated with the channel
-	Transports []string `json:"transports"` // Transports: List of transports used by the channel
+	ID         int      `json:"id"`              // ID: Unique identifier of the channel
+	Name       string   `json:"name,omitempty"`  // Name: Name of the channel
+	Phone      string   `json:"phone,omitempty"` // Phone: Phone number associated with the channel
+	Transports []string `json:"transports"`      // Transports: List of transports used by the channel
 }
 
 // ChannelsResponse represents the response from the Chat2Desk API
