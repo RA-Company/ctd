@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCtd_CustomClientFields(t *testing.T) {
+func TestCtdApi_CompaniesApiInfo(t *testing.T) {
 	ctx := t.Context()
 
 	url, token := getCredentials(t)
@@ -34,19 +34,22 @@ func TestCtd_CustomClientFields(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			dst := &Ctd{}
 			dst.Init(url, tt.token)
-			got, err := dst.GetCustomClientFields(ctx)
+			got, err := dst.CompaniesApiInfo(ctx)
 			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error, "dst.GetClient() error")
+				require.ErrorIs(t, err, tt.error, "dst.CompaniesApiInfo() error")
 
 			} else {
 
 			}
 			if tt.isData {
-				require.NotNil(t, got, "dst.GetClient() should return data")
+				require.NotNil(t, got, "dst.CompaniesApiInfo() should return data")
+				require.NotNil(t, got.CompanyName, "got.CompanyName should not be nil")
+				require.NotNil(t, got.AdminEmail, "got.AdminEmail should not be nil")
+				require.NotEqual(t, 0, got.CompanyID, "got.CompanyID should not be 0")
+				require.NotEqual(t, 0, got.PartnerID, "got.PartnerID should not be 0")
 			} else {
-				require.Nil(t, got, "dst.GetClient() should return nil data on error")
+				require.Nil(t, got, "dst.CompaniesApiInfo() should return nil data on error")
 			}
-
 		})
 	}
 }
