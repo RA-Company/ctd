@@ -249,6 +249,47 @@ Returns:
 
 </details>
 
+## Messages
+
+<details>
+<summary>Functions list</summary>
+
+```func (*Ctd).APISendMessage(ctx context.Context, message *MessagePayload) (*MessageResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APISendMessage sends a message via the API.
+It takes a context and a MessagePayload, and returns a MessageResponse or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message (*MessagePayload): The message payload to send.
+
+Returns:
+  - A pointer to a MessageResponse containing the response data.
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*MessageItem, error)```
+
+<details>
+<summary>Function description</summary>
+
+SendMessage sends a message to the API.
+It takes a context and a MessagePayload, and returns a MessageItem or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message (MessagePayload): The message payload to send.
+
+Returns:
+  - A pointer to a MessageItem containing the response data.
+  - An error if the request fails.
+</details>
+
+</details>
+
 ## Tags
 
 <details>

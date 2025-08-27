@@ -66,14 +66,9 @@ type ClientItem struct {
 func (dst *Ctd) APIGetClient(ctx context.Context, id int) (*ClientResponse, error) {
 	url := fmt.Sprintf("%sv1/clients/%d", dst.Url, id)
 	response := ClientResponse{}
-	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
-	if err != nil {
+	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
 		dst.Error(ctx, "Failed to get client: %v", err)
 		return nil, err
-	}
-	if response.Status != "success" {
-		dst.Error(ctx, "Failed to get client: %s", response.Errors)
-		return nil, ErrorInvalidID
 	}
 	return &response, nil
 }

@@ -18,6 +18,7 @@ var (
 	ErrorInvalidToken            = fmt.Errorf("invalid token")
 	ErrorWebhookUrlIsAlreadyUsed = fmt.Errorf("webhook URL is already used")
 	ErrorInvalidID               = fmt.Errorf("invalid ID")
+	ErrorInvalidParameters       = fmt.Errorf("invalid parameters")
 )
 
 // MetaResponse provides metadata about the response,
