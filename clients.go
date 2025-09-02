@@ -129,7 +129,7 @@ func (dst *Ctd) APIGetClients(ctx context.Context, offset, limit int, order, par
 // Returns:
 //   - A pointer to a ClientsResponse struct containing the new client data.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) APICreateClient(ctx *context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientResponse, error) {
+func (dst *Ctd) APICreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientResponse, error) {
 	url := fmt.Sprintf("%sv1/clients", dst.Url)
 	data := map[string]any{
 		"phone":      phone,
@@ -144,9 +144,9 @@ func (dst *Ctd) APICreateClient(ctx *context.Context, phone, transport string, c
 	}
 
 	response := ClientResponse{}
-	_, err := dst.doRequest(*ctx, "POST", url, data, &response)
+	_, err := dst.doRequest(ctx, "POST", url, data, &response)
 	if err != nil {
-		dst.Error(*ctx, "Failed to create client: %v", err)
+		dst.Error(ctx, "Failed to create client: %v", err)
 		return nil, err
 	}
 
@@ -232,7 +232,7 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) (*[]Clien
 //   - A pointer to a ClientItem struct containing the client details.
 //   - An error if the request fails, if the response is invalid, or if the client could not be created.
 func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientItem, error) {
-	response, err := dst.APICreateClient(&ctx, phone, transport, channel_id, nickname, assigned_phone)
+	response, err := dst.APICreateClient(ctx, phone, transport, channel_id, nickname, assigned_phone)
 	if err != nil {
 		return nil, err
 	}
