@@ -30,6 +30,10 @@ type CreateWebhookResponse struct {
 	} `json:"errors"` // Errors: Optional field containing errors related to the request
 }
 
+// Error compiles the error messages from the CreateWebhookResponse into a single string.
+// It checks the Errors field for any errors related to the URL, order, or events,
+// and concatenates them into a single string separated by semicolons.
+// If there are no errors, it returns an empty string.
 func (dst *CreateWebhookResponse) Error() string {
 	errs := []string{}
 	if len(dst.Errors.Url) > 0 {
@@ -123,7 +127,7 @@ func (dst *WebhookPayload) Prepare() {
 	}
 }
 
-// GetWebhooks retrieves a list of webhooks from the Chat2Desk API.
+// Webhooks retrieves a list of webhooks from the Chat2Desk API.
 // It takes a context as a parameter and constructs the API endpoint URL.
 // It sends a GET request to the API and returns the response data as a byte slice.
 // If an error occurs during the request, it logs the error and returns it.
