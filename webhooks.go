@@ -195,7 +195,7 @@ func (dst *Ctd) PostWebhooks(ctx context.Context, payload WebhookPayload) (*Crea
 // Returns:
 //   - A pointer to a CreateWebhookResponse struct containing the updated webhook and status.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) PutWebhooks(ctx context.Context, id int, payload WebhookPayload) (*CreateWebhookResponse, error) {
+func (dst *Ctd) PutWebhooks(ctx context.Context, id int, payload *WebhookPayload) (*CreateWebhookResponse, error) {
 	url := fmt.Sprintf("%sv1/webhooks/%d", dst.Url, id)
 
 	payload.Prepare() // Ensure the payload is prepared before sending
@@ -311,7 +311,7 @@ func (dst *Ctd) CreateWebhook(ctx context.Context, payload WebhookPayload) (*Web
 // Returns:
 //   - A pointer to a WebhookItem containing the updated webhook.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) UpdateWebhook(ctx context.Context, id int, payload WebhookPayload) (*WebhookItem, error) {
+func (dst *Ctd) UpdateWebhook(ctx context.Context, id int, payload *WebhookPayload) (*WebhookItem, error) {
 	response, err := dst.PutWebhooks(ctx, id, payload)
 	if err != nil {
 		return nil, err

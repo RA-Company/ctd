@@ -105,7 +105,7 @@ func TestCtd_Webhook(t *testing.T) {
 			Status:   "disable",
 		}
 
-		got, err := dst.UpdateWebhook(ctx, id, payload)
+		got, err := dst.UpdateWebhook(ctx, id, &payload)
 		require.NoError(t, err, "dst.UpdateWebhook() should not return an error")
 		require.NotNil(t, got, "dst.UpdateWebhook() should return data")
 		require.Equal(t, payload.Name, got.Name, "dst.UpdateWebhook() should return the correct webhook name")
