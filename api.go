@@ -33,6 +33,12 @@ type MetaResponse struct {
 	Offset int `json:"offset"`
 }
 
+type BasicResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+	Errors  any    `json:"errors,omitempty"`
+}
+
 type Ctd struct {
 	logging.CustomLogger
 	Url       string
