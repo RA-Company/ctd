@@ -28,7 +28,7 @@ func TestCtd_Webhook(t *testing.T) {
 			Status:   "enable",
 		}
 
-		got, err := dst.CreateWebhook(ctx, payload)
+		got, err := dst.CreateWebhook(ctx, &payload)
 		require.NoError(t, err, "dst.CreateWebhook() should not return an error")
 		require.NotNil(t, got, "dst.CreateWebhook() should return data")
 		require.Equal(t, payload.Name, got.Name, "dst.CreateWebhook() should return the correct webhook name")
@@ -40,7 +40,7 @@ func TestCtd_Webhook(t *testing.T) {
 		id = got.ID
 
 		t.Run("CreateWebhook with existing URL", func(t *testing.T) {
-			got, err := dst.CreateWebhook(ctx, payload)
+			got, err := dst.CreateWebhook(ctx, &payload)
 			require.ErrorIs(t, err, ErrorWebhookUrlIsAlreadyUsed, "dst.CreateWebhook() should return an error for existing URL")
 			require.Nil(t, got, "dst.CreateWebhook() should return nil data on error")
 		})
