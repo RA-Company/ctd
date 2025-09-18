@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
-type StatisticRating struct {
+type StatisticsRating struct {
 	ScoreValue         json.Number `json:"score_value"`
 	RatingScaleScore   int64       `json:"rating_scale_score"`
 	ValuationRequestID int64       `json:"valuation_request_id"`
 }
 
-type StatisticRatingsResponse struct {
-	Data []StatisticRating `json:"data"`
-	Meta MetaResponse      `json:"meta"`
+type StatisticsRatingResponse struct {
+	Data []StatisticsRating `json:"data"`
+	Meta MetaResponse       `json:"meta"`
 	BasicResponse
 }
 
@@ -24,7 +24,7 @@ type StatisticRatingsResponse struct {
 //
 // Returns:
 //   - An int64 representing the score value, or -1 if the conversion fails.
-func (dst *StatisticRating) GetScoreValue() int64 {
+func (dst *StatisticsRating) GetScoreValue() int64 {
 	if result, err := dst.ScoreValue.Int64(); err != nil {
 		return -1
 	} else {
@@ -45,7 +45,7 @@ func (dst *StatisticRating) GetScoreValue() int64 {
 //
 // Returns:
 //   - A uint8 representing the category of the score value (0, 1, 2, or 3).
-func (dst *StatisticRating) GetRangeValue(limit1, limit2 int64) uint8 {
+func (dst *StatisticsRating) GetRangeValue(limit1, limit2 int64) uint8 {
 	res := dst.GetScoreValue()
 
 	if res == -1 {
@@ -63,9 +63,9 @@ func (dst *StatisticRating) GetRangeValue(limit1, limit2 int64) uint8 {
 
 // APIStatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
 // It constructs the API endpoint URL with the provided date, offset, and limit,
-// sends a GET request to the API, and returns the response data as a StatisticRatingsResponse struct.
+// sends a GET request to the API, and returns the response data as a StatisticsRatingResponse struct.
 // If an error occurs during the request, it logs the error and returns it.
-// If the request is successful, it returns a pointer to the StatisticRatingsResponse struct.
+// If the request is successful, it returns a pointer to the StatisticsRatingResponse struct.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -74,9 +74,9 @@ func (dst *StatisticRating) GetRangeValue(limit1, limit2 int64) uint8 {
 //   - limit: The maximum number of ratings to return.
 //
 // Returns:
-//   - A pointer to a StatisticRatingsResponse struct containing the list of statistic ratings and metadata.
+//   - A pointer to a StatisticsRatingResponse struct containing the list of statistic ratings and metadata.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset, limit int) (*StatisticRatingsResponse, error) {
+func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset, limit int) (*StatisticsRatingResponse, error) {
 	if date.IsZero() {
 		date = time.Now()
 	}
@@ -85,7 +85,7 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 	timeout := dst.Timeout
 	defer func() { dst.Timeout = timeout }()
 
-	response := StatisticRatingsResponse{}
+	response := StatisticsRatingResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
 		dst.Error(ctx, "Failed to get statistics: %v", err)
@@ -98,7 +98,7 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 // StatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
 // It uses the APIStatisticsRating method to fetch the ratings and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a slice of StatisticRating, which contains the ratings.
+// It returns a pointer to a slice of StatisticsRating, which contains the ratings.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -107,9 +107,9 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 //   - limit: The maximum number of ratings to return.
 //
 // Returns:
-//   - A pointer to a slice of StatisticRating containing the list of statistic ratings.
+//   - A pointer to a slice of StatisticsRating containing the list of statistic ratings.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*[]StatisticRating, error) {
+func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*[]StatisticsRating, error) {
 	data, err := dst.APIStatisticsRating(ctx, date, offset, limit)
 	if err != nil {
 		return nil, err
@@ -127,17 +127,17 @@ func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int
 
 // AllStatisticsRating retrieves all statistic ratings from the Chat2Desk API by handling pagination.
 // It repeatedly calls the StatisticsRating method with increasing offsets until all ratings are fetched.
-// It returns a pointer to a slice of StatisticRating, which contains all the ratings.
+// It returns a pointer to a slice of StatisticsRating, which contains all the ratings.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - date: The date for which to retrieve statistics. If zero, the current date is used.
 //
 // Returns:
-//   - A pointer to a slice of StatisticRating containing all the statistic ratings.
+//   - A pointer to a slice of StatisticsRating containing all the statistic ratings.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) AllStatisticsRating(ctx context.Context, date time.Time) (*[]StatisticRating, error) {
-	ratings := []StatisticRating{}
+func (dst *Ctd) AllStatisticsRating(ctx context.Context, date time.Time) (*[]StatisticsRating, error) {
+	ratings := []StatisticsRating{}
 	offset := 0
 	limit := 200
 
