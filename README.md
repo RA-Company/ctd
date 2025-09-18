@@ -399,6 +399,107 @@ Returns:
 
 </details>
 
+## Statistics
+
+<details>
+<summary>Functions list</summary>
+
+```func (*StatisticRating).GetScoreValue() int64```
+
+<details>
+<summary>Function description</summary>
+
+GetScoreValue converts the ScoreValue from json.Number to int64.
+If the conversion fails, it returns -1 to indicate an invalid score.
+
+Returns:
+  - An int64 representing the score value, or -1 if the conversion fails.
+</details>
+
+```func (*StatisticRating).GetRangeValue(limit1 int64, limit2 int64) uint8```
+
+<details>
+<summary>Function description</summary>
+
+GetRangeValue categorizes the score value into three ranges based on the provided limits.
+It uses the GetScoreValue method to retrieve the score value.
+If the score value is less than or equal to limit1, it returns 1.
+If the score value is less than or equal to limit2, it returns 2.
+If the score value is greater than limit2, it returns 3.
+If the score value is invalid (i.e., -1), it returns 0.
+
+Parameters:
+  - limit1: The first limit for categorization.
+  - limit2: The second limit for categorization.
+
+Returns:
+  - A uint8 representing the category of the score value (0, 1, 2, or 3).
+</details>
+
+```func (*Ctd).APIStatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*StatisticRatingsResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIStatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
+It constructs the API endpoint URL with the provided date, offset, and limit,
+sends a GET request to the API, and returns the response data as a StatisticRatingsResponse struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the StatisticRatingsResponse struct.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - date: The date for which to retrieve statistics. If zero, the current date is used.
+  - offset: The offset for pagination, indicating where to start fetching ratings.
+  - limit: The maximum number of ratings to return.
+
+Returns:
+  - A pointer to a StatisticRatingsResponse struct containing the list of statistic ratings and metadata.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*[]StatisticRating, error)```
+
+<details>
+<summary>Function description</summary>
+
+StatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
+It uses the APIStatisticsRating method to fetch the ratings and handles errors.
+If the response status is not "success", it returns nil.
+It returns a pointer to a slice of StatisticRating, which contains the ratings.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - date: The date for which to retrieve statistics. If zero, the current date is used.
+  - offset: The offset for pagination, indicating where to start fetching ratings.
+  - limit: The maximum number of ratings to return.
+
+Returns:
+  - A pointer to a slice of StatisticRating containing the list of statistic ratings.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).AllStatisticsRating(ctx context.Context, date time.Time) (*[]StatisticRating, error)```
+
+<details>
+<summary>Function description</summary>
+
+AllStatisticsRating retrieves all statistic ratings from the Chat2Desk API by handling pagination.
+It repeatedly calls the StatisticsRating method with increasing offsets until all ratings are fetched.
+It returns a pointer to a slice of StatisticRating, which contains all the ratings.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - date: The date for which to retrieve statistics. If zero, the current date is used.
+
+Returns:
+  - A pointer to a slice of StatisticRating containing all the statistic ratings.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+</details>
+
+
 ## Tags
 
 <details>
