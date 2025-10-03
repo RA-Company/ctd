@@ -34,14 +34,14 @@ type MessagePayload struct {
 	Interactive        string          `json:"interactive,omitempty"`         // Interactive: optional interactive parameters for the 'list' and 'button' types. Only for wa_dialog.
 }
 
-type MessageResponse struct {
-	Data    MessageItem `json:"data"` // Data: List of clients
-	Message string      `json:"message"`
-	Errors  any         `json:"errors,omitempty"` // Errors: List of errors,
-	Status  string      `json:"status"`
+type SendMessageResponse struct {
+	Data    SendMessageItem `json:"data"` // Data: List of clients
+	Message string          `json:"message"`
+	Errors  any             `json:"errors,omitempty"` // Errors: List of errors,
+	Status  string          `json:"status"`
 }
 
-type MessageItem struct {
+type SendMessageItem struct {
 	MessageID  int    `json:"message_id"`  // MessageID: Unique message ID
 	ChannelID  int    `json:"channel_id"`  // ChannelID: Channel ID
 	OperatorID int    `json:"operator_id"` // OperatorID: Operator ID
@@ -50,6 +50,35 @@ type MessageItem struct {
 	ClientID   int    `json:"client_id"`   // ClientID: Client ID
 	DialogID   int    `json:"dialog_id"`   // DialogID: Dialog ID
 	RequestID  int    `json:"request_id"`  // RequestID: Request ID
+}
+
+type MessageAttachment struct {
+	Name string `json:"name"` // Name: Attachment name
+	Link string `json:"link"` // Link: Attachment link
+}
+
+type MessageItem struct {
+	ID              int                 `json:"id"`               // ID: Unique message ID
+	Coordinates     string              `json:"coordinates"`      // Coordinates: Message coordinates (if any)
+	Transport       string              `json:"transport"`        // Transport: Transport
+	Type            string              `json:"type"`             // Type: Message type ('to_client', 'autoreply', 'system', 'comment')
+	Read            int                 `json:"read"`             // Read: Read status (0 or 1)
+	Created         string              `json:"created"`          // Created: Creation timestamp
+	Pdf             string              `json:"pdf"`              // Pdf: PDF attachment (if any)
+	RemoteID        string              `json:"remote_id"`        // RemoteID: Remote ID (if any)
+	RecipientStatus string              `json:"recipient_status"` // RecipientStatus: Recipient status ('delivered', 'not delivered', etc.)
+	AiTips          string              `json:"ai_tips"`          // AiTips: AI tips (if any)
+	Attachments     []MessageAttachment `json:"attachments"`      // Attachments: List of attachments
+	Photo           string              `json:"photo"`            // Photo: Photo attachment (if any)
+	Video           string              `json:"video"`            // Video attachment (if any)
+	Audio           string              `json:"audio"`            // Audio attachment (if any)
+	OperatorID      int                 `json:"operator_id"`      // OperatorID: Operator ID
+	ChannelID       int                 `json:"channel_id"`       // ChannelID: Channel ID
+	DialogID        int                 `json:"dialog_id"`        // DialogID: Dialog ID
+	ClientID        int                 `json:"client_id"`        // ClientID: Client ID
+	RequestID       int                 `json:"request_id"`       // RequestID: Request ID
+	ExtraData       any                 `json:"extra_data"`       // ExtraData: Extra data (if any)
+	Status          string              `json:"status"`           // Status: Message status ('sent', 'failed', etc.)
 }
 
 // APISendMessage sends a message via the API.
@@ -62,9 +91,9 @@ type MessageItem struct {
 // Returns:
 //   - A pointer to a MessageResponse containing the response data.
 //   - An error if the request fails.
-func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*MessageResponse, error) {
+func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*SendMessageResponse, error) {
 	url := fmt.Sprintf("%sv1/messages", dst.Url)
-	response := MessageResponse{}
+	response := SendMessageResponse{}
 
 	message.Type = strings.ToLower(message.Type)
 	if !slices.Contains([]string{"to_client", "autoreply", "system", "comment"}, message.Type) {
@@ -88,7 +117,7 @@ func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*M
 // Returns:
 //   - A pointer to a MessageItem containing the response data.
 //   - An error if the request fails.
-func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*MessageItem, error) {
+func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*SendMessageItem, error) {
 	data, err := dst.APISendMessage(ctx, message)
 	if err != nil {
 		return nil, err

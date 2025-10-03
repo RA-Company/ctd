@@ -249,6 +249,82 @@ Returns:
 
 </details>
 
+## Dialogs
+
+<details>
+<summary>Functions list</summary>
+
+```func (*Ctd).APIGetDialogs(ctx context.Context, params *GetDialogsParams) (*DialogsResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIGetDialogs retrieves a list of dialogs from the API.
+It takes a context and GetDialogsParams, and returns a DialogsResponse or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - params (*GetDialogsParams): The parameters for filtering and pagination.
+
+Returns:
+  - A pointer to a DialogsResponse containing the response data.
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).APIGetDialog(ctx context.Context, dialog_id int64) (*DialogResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIGetDialog retrieves a dialog by its ID from the API.
+It takes a context and a dialog ID, and returns a DialogResponse or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - dialog_id (int64): The ID of the dialog to retrieve.
+
+Returns:
+  - A pointer to a DialogResponse containing the response data.
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) (*[]DialogItem, error)```
+
+<details>
+<summary>Function description</summary>
+
+GetDialogs retrieves a list of dialogs.
+It takes a context and GetDialogsParams, and returns a slice of DialogItem or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - params (*GetDialogsParams): The parameters for filtering and pagination.
+
+Returns:
+  - A pointer to a slice of DialogItem containing the dialogs.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).GetDialog(ctx context.Context, dialog_id int64) (*DialogItem, error)```
+
+<details>
+<summary>Function description</summary>
+
+GetDialog retrieves a dialog by its ID.
+It takes a context and a dialog ID, and returns a DialogItem or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - dialog_id (int64): The ID of the dialog to retrieve.
+
+Returns:
+  - A pointer to a DialogItem containing the dialog data.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+</details>
+
+
 ## Messages
 
 <details>
