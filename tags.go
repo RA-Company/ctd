@@ -82,7 +82,7 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
 // GetTags retrieves a list of tags from the Chat2Desk API.
 // It uses the APIGetTags method to fetch the tags and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a slice of TagItem, which contains the tags.
+// It returns a slice of TagItem, which contains the tags.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -90,10 +90,10 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
 //   - limit: The maximum number of tags to retrieve.
 //
 // Returns:
-//   - A pointer to a slice of TagItem, which contains the tags
+//   - A slice of TagItem, which contains the tags
 //   - The total number of tags available.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) (*[]TagItem, int, error) {
+func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]TagItem, int, error) {
 	if offset < 0 {
 		offset = 0
 	}
@@ -112,7 +112,7 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) (*[]TagItem, in
 		return nil, 0, nil
 	}
 
-	return &response.Data, response.Meta.Total, nil
+	return response.Data, response.Meta.Total, nil
 }
 
 // GetTag retrieves a specific tag by its ID from the Chat2Desk API.
@@ -146,15 +146,15 @@ func (dest *Ctd) GetTag(ctx context.Context, id int) (*TagItem, error) {
 
 // GetAllTags retrieves all tags from the Chat2Desk API.
 // It uses the GetTags method to fetch tags in a loop until all tags are retrieved.
-// It returns a pointer to a slice of TagItem, which contains all the tags.
+// It returns a slice of TagItem, which contains all the tags.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A pointer to a slice of TagItem, which contains all the tags.
+//   - A slice of TagItem, which contains all the tags.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetAllTags(ctx context.Context) (*[]TagItem, error) {
+func (dest *Ctd) GetAllTags(ctx context.Context) ([]TagItem, error) {
 	var tags []TagItem
 	offset := 0
 	limit := 200
@@ -165,16 +165,16 @@ func (dest *Ctd) GetAllTags(ctx context.Context) (*[]TagItem, error) {
 			return nil, err
 		}
 
-		if response == nil || len(*response) == 0 {
+		if len(response) == 0 {
 			break
 		}
 
-		tags = append(tags, *response...)
+		tags = append(tags, response...)
 		offset += limit
 		if offset >= total {
 			break
 		}
 	}
 
-	return &tags, nil
+	return tags, nil
 }

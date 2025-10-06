@@ -59,8 +59,9 @@ func (dst *Ctd) APICustomClientFields(ctx context.Context) (*CustomClientFieldRe
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A pointer to a slice of CustomClientFieldItem containing the custom client fields.
-func (dst *Ctd) GetCustomClientFields(ctx context.Context) (*[]CustomClientFieldItem, error) {
+//   - A slice of CustomClientFieldItem containing the custom client fields.
+//   - An error if the request fails or if the response is invalid.
+func (dst *Ctd) GetCustomClientFields(ctx context.Context) ([]CustomClientFieldItem, error) {
 	response, err := dst.APICustomClientFields(ctx)
 	if err != nil {
 		return nil, err
@@ -71,5 +72,5 @@ func (dst *Ctd) GetCustomClientFields(ctx context.Context) (*[]CustomClientField
 		return nil, ErrorInvalidResponse
 	}
 
-	return &response.Data, nil
+	return response.Data, nil
 }

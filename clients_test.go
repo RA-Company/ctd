@@ -77,14 +77,14 @@ func TestCtd_Clients(t *testing.T) {
 		got, total, err := dst.GetClientsList(ctx, offset, limit)
 		require.NoError(t, err, "dst.GetClientsList() should not return an error")
 		require.NotNil(t, got, "dst.GetClientsList() should return data")
-		require.Greater(t, len(*got), 0, "dst.GetClientsList() should return non-empty client list")
+		require.Greater(t, len(got), 0, "dst.GetClientsList() should return non-empty client list")
 		require.Greater(t, total, 0, "dst.GetClientsList() should return non-zero total count")
 
 		offset += limit
 		got2, total2, err := dst.GetClientsList(ctx, offset, limit)
 		require.NoError(t, err, "dst.GetClientsList() should not return an error on second call")
 		require.NotNil(t, got2, "dst.GetClientsList() should return data on second call")
-		require.Greater(t, len(*got2), 0, "dst.GetClientsList() should return non-empty client list on second call")
+		require.Greater(t, len(got2), 0, "dst.GetClientsList() should return non-empty client list on second call")
 		require.Greater(t, total2, 0, "dst.GetClientsList() should return non-zero total count on second call")
 		require.Equal(t, total, total2, "dst.GetClientsList() should return the same total count on both calls")
 		require.NotEqual(t, got, got2, "dst.GetClientsList() should return different data on different calls with different offsets")

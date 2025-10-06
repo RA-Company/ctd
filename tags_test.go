@@ -72,7 +72,7 @@ func TestCtd_Tags(t *testing.T) {
 		limit := 10
 		total := 0
 		var (
-			got *[]TagItem
+			got []TagItem
 			err error
 		)
 
@@ -80,7 +80,7 @@ func TestCtd_Tags(t *testing.T) {
 			got, total, err = dst.GetTags(ctx, offset, limit)
 			require.NoError(t, err, "dst.GetTags() should not return an error")
 			require.NotNil(t, got, "dst.GetTags() should return data")
-			require.Greater(t, len(*got), 0, "dst.GetTags() should return non-empty tag list")
+			require.Greater(t, len(got), 0, "dst.GetTags() should return non-empty tag list")
 			require.Greater(t, total, 0, "dst.GetTags() should return non-zero total count")
 		})
 
@@ -89,7 +89,7 @@ func TestCtd_Tags(t *testing.T) {
 			got2, total2, err := dst.GetTags(ctx, offset, limit)
 			require.NoError(t, err, "dst.GetTags() should not return an error on second call")
 			require.NotNil(t, got2, "dst.GetTags() should return data on second call")
-			require.Greater(t, len(*got2), 0, "dst.GetTags() should return non-empty tag list on second call")
+			require.Greater(t, len(got2), 0, "dst.GetTags() should return non-empty tag list on second call")
 			require.Greater(t, total2, 0, "dst.GetTags() should return non-zero total count on second call")
 			require.Equal(t, total, total2, "dst.GetTags() should return the same total count on both calls")
 			require.NotEqual(t, got, got2, "dst.GetTags() should return different data on different calls with different offsets")
@@ -98,14 +98,14 @@ func TestCtd_Tags(t *testing.T) {
 		t.Run("GetTagsList with invalid offset", func(t *testing.T) {
 			got, _, err = dst.GetTags(ctx, 100000, limit)
 			require.NoError(t, err, "dst.GetTags() should return an error for invalid offset")
-			require.Equal(t, len(*got), 0, "dst.GetTags() should return nil data for invalid offset")
+			require.Equal(t, len(got), 0, "dst.GetTags() should return nil data for invalid offset")
 		})
 
 		t.Run("GetAllTags", func(t *testing.T) {
 			allTags, err := dst.GetAllTags(ctx)
 			require.NoError(t, err, "dst.GetAllTags() should not return an error")
 			require.NotNil(t, allTags, "dst.GetAllTags() should return data")
-			require.Greater(t, len(*allTags), 0, "dst.GetAllTags() should return non-empty tag list")
+			require.Greater(t, len(allTags), 0, "dst.GetAllTags() should return non-empty tag list")
 		})
 	})
 }

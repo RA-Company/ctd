@@ -245,7 +245,7 @@ func (dst *Ctd) DeleteWebhooks(ctx context.Context, id int) (*DeleteWebhookRespo
 // GetWebhooks retrieves a list of webhooks from the Chat2Desk API.
 // It takes a context as a parameter and calls the Webhooks method.
 // If the response status is not "success", it logs an error and returns nil.
-// It returns a pointer to a slice of WebhookItem, which contains the webhooks.
+// It returns a slice of WebhookItem, which contains the webhooks.
 // If an error occurs during the request, it returns nil and the error.
 // If the request is successful, it returns a pointer to a slice of WebhookItem.
 // This method is typically used to fetch webhooks from the Chat2Desk API.
@@ -254,9 +254,9 @@ func (dst *Ctd) DeleteWebhooks(ctx context.Context, id int) (*DeleteWebhookRespo
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A pointer to a slice of WebhookItem containing the webhooks.
+//   - A slice of WebhookItem containing the webhooks.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetWebhooks(ctx context.Context) (*[]WebhookItem, error) {
+func (dst *Ctd) GetWebhooks(ctx context.Context) ([]WebhookItem, error) {
 	response, err := dst.Webhooks(ctx)
 	if err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ func (dst *Ctd) GetWebhooks(ctx context.Context) (*[]WebhookItem, error) {
 		return nil, ErrorInvalidResponse
 	}
 
-	return &response.Data, nil
+	return response.Data, nil
 }
 
 // CreateWebhook creates a new webhook in the Chat2Desk API.

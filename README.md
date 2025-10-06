@@ -4,6 +4,157 @@ Chat2Desk API functions
 
 # Functions
 
+## Initial functions
+
+<details>
+<summary>Functions list</summary>
+
+```func (*Ctd).Init(url string, token string)```
+
+<details>
+<summary>Function description</summary>
+
+Init initializes the Ctd instance with the provided URL and token.
+It sets the URL to ensure it ends with a slash and assigns the token.
+The timeout is set to 10 seconds by default.
+This method is typically called before making any API requests to ensure
+that the Ctd instance is properly configured with the necessary
+URL and authentication token.
+
+Parameters:
+  - url: The base URL of the Chat2Desk API, which should end with a slash.
+  - token: The authentication token for the Chat2Desk API, used
+</details>
+
+```func (*Ctd).Get(ctx context.Context, path string, response any) ([]byte, error)```
+
+<details>
+<summary>Function description</summary>
+
+Get retrieves data from the specified path using a GET request.
+It constructs the full URL by appending the path to the base URL.
+The method sends a GET request to the API and returns the response data as a byte slice.
+If an error occurs during the request, it logs the error and returns it.
+If the request times out, it retries the request once.
+This method is typically used to fetch data from the Chat2Desk API.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - path: The path to the specific API endpoint to retrieve data from.
+  - response: A pointer to a struct where the response data will be unmarshaled.
+
+Returns:
+  - A byte slice containing the response data from the API.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).Post(ctx context.Context, path string, data any, response any) ([]byte, error)```
+
+<details>
+<summary>Function description</summary>
+
+Post sends data to the specified path using a POST request.
+It constructs the full URL by appending the path to the base URL.
+The method sends a POST request to the API with the provided data and returns the response data as a byte slice.
+If an error occurs during the request, it logs the error and returns it.
+If the request times out, it retries the request once.
+This method is typically used to send data to the Chat2Desk API.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - path: The path to the specific API endpoint to send data to.
+  - data: The data to be sent in the request body, which can be of any type (string, byte slice, or struct).
+  - response: A pointer to a struct where the response data will be unmarshaled.
+
+Returns:
+  - A byte slice containing the response data from the API.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).Put(ctx context.Context, path string, data any, response any) ([]byte, error)```
+
+<details>
+<summary>Function description</summary>
+
+Put sends data to the specified path using a PUT request.
+It constructs the full URL by appending the path to the base URL.
+The method sends a PUT request to the API with the provided data and returns the response data as a byte slice.
+If an error occurs during the request, it logs the error and returns it.
+If the request times out, it retries the request once.
+This method is typically used to update data in the Chat2Desk API.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - path: The path to the specific API endpoint to send data to.
+  - data: The data to be sent in the request body, which can be of any type (string, byte slice, or struct).
+  - response: A pointer to a struct where the response data will be unmarshaled.
+
+Returns:
+  - A byte slice containing the response data from the API.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).Delete(ctx context.Context, path string, response any) ([]byte, error)```
+
+<details>
+<summary>Function description</summary>
+
+Delete sends a DELETE request to the specified path.
+It constructs the full URL by appending the path to the base URL.
+The method sends a DELETE request to the API and returns the response data as a byte slice.
+If an error occurs during the request, it logs the error and returns it.
+If the request times out, it retries the request once.
+This method is typically used to delete data from the Chat2Desk API.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - path: The path to the specific API endpoint to delete data from.
+  - response: A pointer to a struct where the response data will be unmarshaled.
+
+Returns:
+  - A byte slice containing the response data from the API.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).doRequest(ctx context.Context, method string, url string, payload any, response any) ([]byte, error)```
+
+<details>
+<summary>Function description</summary>
+
+doRequest performs an HTTP request with the specified method, URL, and payload.
+It handles the request creation, sending, and response reading.
+The method supports GET, POST, PUT, and DELETE requests.
+It sets the appropriate headers, including the Authorization header if a token is provided.
+It also measures the time taken for the request and logs debug information.
+If the response body contains an error message indicating an invalid token,
+it returns an ErrorInvalidToken error.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - method: The HTTP method to use for the request (e.g., "GET", "POST", "PUT", "DELETE").
+  - url: The full URL for the request, including the base URL and any specific path.
+  - payload: The data to be sent in the request body, which can be of any type (string, byte slice, or struct).
+
+Returns:
+  - A byte slice containing the response data from the API.
+  - An error if the request fails, if the response is invalid, or if the response indicates an invalid token.
+</details>
+
+```func (*Ctd).LastError() any```
+
+<details>
+<summary>Function description</summary>
+
+LastError returns the last error encountered during API requests.
+This method is useful for retrieving the last error that occurred,
+allowing for error handling or logging in the application.
+
+Returns:
+  - The last error encountered during API requests, or nil if no error occurred.
+</details>
+
+</details>
+
 ## Channels
 
 <details>
@@ -33,7 +184,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetChannels(ctx context.Context, offset int, limit int) (*[]ChannelItem, error)```
+```func (*Ctd).GetChannels(ctx context.Context, offset int, limit int) ([]ChannelItem, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -41,7 +192,7 @@ Returns:
 GetChannels retrieves a list of channels from the Chat2Desk API.
 It uses the Channels method to fetch the channels and handles errors.
 If the response status is not "success", it logs an error and returns nil.
-It returns a pointer to a slice of ChannelItem, which contains the channels.
+It returns a slice of ChannelItem, which contains the channels.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -49,14 +200,9 @@ Parameters:
   - limit: The maximum number of channels to return.
 
 Returns:
-  - A pointer to a slice of ChannelItem containing the channels.
+  - A slice of ChannelItem containing the channels.
+  - The total number of channels available (for pagination).
   - An error if the request fails or if the response is invalid.
-
-This function is a wrapper around the Channels method to provide a more user-friendly interface.
-It simplifies the process of fetching channels by handling the response and error checking.
-It is useful for applications that need to retrieve channels from the Chat2Desk API
-in a straightforward manner without dealing with the raw response data.
-It is designed to be used in contexts where channels need to be displayed or processed further.
 </details>
 
 </details>
@@ -113,7 +259,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).APICreateClient(ctx *context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientResponse, error)```
+```func (*Ctd).APICreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -159,7 +305,7 @@ Returns:
   - An error if the request fails, if the response is invalid, or if no client data is found.
 </details>
 
-```func (*Ctd).GetClientsList(ctx context.Context, offset int, limit int) (*[]ClientItem, int, error)```
+```func (*Ctd).GetClientsList(ctx context.Context, offset int, limit int) ([]ClientItem, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -175,7 +321,7 @@ Parameters:
   - limit: The maximum number of clients to return.
 
 Returns:
-  - A pointer to a slice of ClientItem containing the clients.
+  - A slice of ClientItem containing the clients.
   - The total number of clients available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
@@ -206,7 +352,43 @@ Returns:
 
 </details>
 
-## Custom client fields
+## Companies API Info
+
+<details>
+<summary>Functions list</summary>
+
+```func (*Ctd).APICompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIGetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
+It constructs the API endpoint URL, sends a GET request to the API,
+and returns the response data as a CompaniesApiInfoResponse struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the CompaniesApiInfoResponse struct.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+</details>
+
+```func (*Ctd).CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoData, error)```
+
+<details>
+<summary>Function description</summary>
+
+GetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
+It uses the APICompaniesApiInfo method to fetch the company information and handles errors.
+If the response status is not "success", it returns nil.
+It returns a pointer to a CompaniesApiInfoData struct, which contains the company information.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+</details>
+
+</details>
+
+## Custom Client Fields
 
 <details>
 <summary>Functions list</summary>
@@ -230,7 +412,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetCustomClientFields(ctx context.Context) (*[]CustomClientFieldItem, error)```
+```func (*Ctd).GetCustomClientFields(ctx context.Context) ([]CustomClientFieldItem, error)```
 
 <details>
 <summary>Function description</summary>
@@ -244,7 +426,8 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A pointer to a slice of CustomClientFieldItem containing the custom client fields.
+  - A slice of CustomClientFieldItem containing the custom client fields.
+  - An error if the request fails or if the response is invalid.
 </details>
 
 </details>
@@ -253,6 +436,13 @@ Returns:
 
 <details>
 <summary>Functions list</summary>
+
+```func (*GetDialogsParams).Params() string```
+
+<details>
+<summary>Function description</summary>
+
+</details>
 
 ```func (*Ctd).APIGetDialogs(ctx context.Context, params *GetDialogsParams) (*DialogsResponse, error)```
 
@@ -288,7 +478,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) (*[]DialogItem, error)```
+```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) ([]DialogItem, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -301,7 +491,8 @@ Parameters:
   - params (*GetDialogsParams): The parameters for filtering and pagination.
 
 Returns:
-  - A pointer to a slice of DialogItem containing the dialogs.
+  - A slice of DialogItem containing the dialogs.
+  - The total number of dialogs available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -324,13 +515,12 @@ Returns:
 
 </details>
 
-
 ## Messages
 
 <details>
 <summary>Functions list</summary>
 
-```func (*Ctd).APISendMessage(ctx context.Context, message *MessagePayload) (*MessageResponse, error)```
+```func (*Ctd).APISendMessage(ctx context.Context, message *MessagePayload) (*SendMessageResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -347,7 +537,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*MessageItem, error)```
+```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*SendMessageItem, error)```
 
 <details>
 <summary>Function description</summary>
@@ -404,7 +594,7 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A pointer to a slice of OperatorGroup containing the list of operator groups.
+  - A slice of OperatorGroup containing the list of operator groups.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -415,16 +605,16 @@ Returns:
 <details>
 <summary>Functions list</summary>
 
-```func (*Ctd).APIOperators(ctx context.Context, offset int, limit int) (*CtdOperatorsResponse, error)```
+```func (*Ctd).APIOperators(ctx context.Context, offset int, limit int) (*OperatorsResponse, error)```
 
 <details>
 <summary>Function description</summary>
 
 APIOperators retrieves a list of operators from the Chat2Desk API.
 It constructs the API endpoint URL with the provided offset and limit,
-sends a GET request to the API, and returns the response data as a CtdOperatorsResponse struct.
+sends a GET request to the API, and returns the response data as a OperatorsResponse struct.
 If an error occurs during the request, it logs the error and returns it.
-If the request is successful, it returns a pointer to the CtdOperatorsResponse struct.
+If the request is successful, it returns a pointer to the OperatorsResponse struct.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -436,7 +626,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).Operators(ctx context.Context, offset int, limit int) (*[]CtdOperator, error)```
+```func (*Ctd).Operators(ctx context.Context, offset int, limit int) ([]Operator, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -444,7 +634,7 @@ Returns:
 Operators retrieves a list of operators from the Chat2Desk API.
 It uses the APIOperators method to fetch the operators and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a slice of CtdOperator, which contains the operators.
+It returns a slice of Operator, which contains the operators.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -452,24 +642,25 @@ Parameters:
   - limit: The maximum number of operators to return.
 
 Returns:
-  - A pointer to a slice of CtdOperator containing the list of operators.
+  - A a slice of Operator containing the list of operators.
+  - The total number of operators available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).AllOperators(ctx context.Context) (*[]CtdOperator, error)```
+```func (*Ctd).AllOperators(ctx context.Context) ([]Operator, error)```
 
 <details>
 <summary>Function description</summary>
 
 AllOperators retrieves all operators from the Chat2Desk API by handling pagination.
 It repeatedly calls the Operators method with increasing offsets until all operators are fetched.
-It returns a pointer to a slice of CtdOperator, which contains all the operators.
+It returns a slice of Operator, which contains all the operators.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A pointer to a slice of CtdOperator containing all the operators.
+  - A slice of Operator containing all the operators.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -534,7 +725,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*[]StatisticsRating, error)```
+```func (*Ctd).StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) ([]StatisticsRating, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -542,7 +733,7 @@ Returns:
 StatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
 It uses the APIStatisticsRating method to fetch the ratings and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a slice of StatisticsRating, which contains the ratings.
+It returns a slice of StatisticsRating, which contains the ratings.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -551,25 +742,26 @@ Parameters:
   - limit: The maximum number of ratings to return.
 
 Returns:
-  - A pointer to a slice of StatisticsRating containing the list of statistic ratings.
+  - A slice of StatisticsRating containing the list of statistic ratings.
+  - The total number of ratings available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).AllStatisticsRating(ctx context.Context, date time.Time) (*[]StatisticsRating, error)```
+```func (*Ctd).AllStatisticsRating(ctx context.Context, date time.Time) ([]StatisticsRating, error)```
 
 <details>
 <summary>Function description</summary>
 
 AllStatisticsRating retrieves all statistic ratings from the Chat2Desk API by handling pagination.
 It repeatedly calls the StatisticsRating method with increasing offsets until all ratings are fetched.
-It returns a pointer to a slice of StatisticsRating, which contains all the ratings.
+It returns a slice of StatisticsRating, which contains all the ratings.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
   - date: The date for which to retrieve statistics. If zero, the current date is used.
 
 Returns:
-  - A pointer to a slice of StatisticsRating containing all the statistic ratings.
+  - A slice of StatisticsRating containing all the statistic ratings.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -618,7 +810,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetTags(ctx context.Context, offset int, limit int) (*[]TagItem, int, error)```
+```func (*Ctd).GetTags(ctx context.Context, offset int, limit int) ([]TagItem, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -626,7 +818,7 @@ Returns:
 GetTags retrieves a list of tags from the Chat2Desk API.
 It uses the APIGetTags method to fetch the tags and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a slice of TagItem, which contains the tags.
+It returns a slice of TagItem, which contains the tags.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -634,7 +826,7 @@ Parameters:
   - limit: The maximum number of tags to retrieve.
 
 Returns:
-  - A pointer to a slice of TagItem, which contains the tags
+  - A slice of TagItem, which contains the tags
   - The total number of tags available.
   - An error if the request fails or if the response is invalid.
 </details>
@@ -658,26 +850,26 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetAllTags(ctx context.Context) (*[]TagItem, error)```
+```func (*Ctd).GetAllTags(ctx context.Context) ([]TagItem, error)```
 
 <details>
 <summary>Function description</summary>
 
 GetAllTags retrieves all tags from the Chat2Desk API.
 It uses the GetTags method to fetch tags in a loop until all tags are retrieved.
-It returns a pointer to a slice of TagItem, which contains all the tags.
+It returns a slice of TagItem, which contains all the tags.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A pointer to a slice of TagItem, which contains all the tags.
+  - A slice of TagItem, which contains all the tags.
   - An error if the request fails or if the response is invalid.
 </details>
 
 </details>
 
-## Webhooks
+## WebHooks
 
 <details>
 <summary>Functions list</summary>
@@ -800,7 +992,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetWebhooks(ctx context.Context) (*[]WebhookItem, error)```
+```func (*Ctd).GetWebhooks(ctx context.Context) ([]WebhookItem, error)```
 
 <details>
 <summary>Function description</summary>
@@ -808,7 +1000,7 @@ Returns:
 GetWebhooks retrieves a list of webhooks from the Chat2Desk API.
 It takes a context as a parameter and calls the Webhooks method.
 If the response status is not "success", it logs an error and returns nil.
-It returns a pointer to a slice of WebhookItem, which contains the webhooks.
+It returns a slice of WebhookItem, which contains the webhooks.
 If an error occurs during the request, it returns nil and the error.
 If the request is successful, it returns a pointer to a slice of WebhookItem.
 This method is typically used to fetch webhooks from the Chat2Desk API.
@@ -817,7 +1009,7 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A pointer to a slice of WebhookItem containing the webhooks.
+  - A slice of WebhookItem containing the webhooks.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -887,6 +1079,7 @@ Returns:
 </details>
 
 </details>
+
 
 
 # Used libraries

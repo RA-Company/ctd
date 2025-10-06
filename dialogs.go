@@ -118,20 +118,21 @@ func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogRespo
 //   - params (*GetDialogsParams): The parameters for filtering and pagination.
 //
 // Returns:
-//   - A pointer to a slice of DialogItem containing the dialogs.
+//   - A slice of DialogItem containing the dialogs.
+//   - The total number of dialogs available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) (*[]DialogItem, error) {
+func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]DialogItem, int, error) {
 	data, err := dst.APIGetDialogs(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if data.Status != "success" {
 		dst.Error(ctx, "Failed to get dialogs: %s", data.Errors)
-		return nil, ErrorInvalidParameters
+		return nil, 0, ErrorInvalidParameters
 	}
 
-	return &data.Data, nil
+	return data.Data, data.Meta.Total, nil
 }
 
 // GetDialog retrieves a dialog by its ID.

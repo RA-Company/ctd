@@ -194,10 +194,10 @@ func (dst *Ctd) GetClient(ctx context.Context, id int) (*ClientItem, error) {
 //   - limit: The maximum number of clients to return.
 //
 // Returns:
-//   - A pointer to a slice of ClientItem containing the clients.
+//   - A slice of ClientItem containing the clients.
 //   - The total number of clients available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) (*[]ClientItem, int, error) {
+func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]ClientItem, int, error) {
 	response, err := dst.APIGetClients(ctx, offset, limit, "asc", "")
 	if err != nil {
 		return nil, 0, err
@@ -211,7 +211,7 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) (*[]Clien
 		return nil, 0, nil // No clients found
 	}
 
-	return &response.Data, response.Meta.Total, nil
+	return response.Data, response.Meta.Total, nil
 }
 
 // CreateClient creates a new client in the Chat2Desk API.

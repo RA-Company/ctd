@@ -45,12 +45,13 @@ func TestCtdApi_Operators(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			dst := &Ctd{}
 			dst.Init(tt.args.url, tt.args.token)
-			got, err := dst.Operators(ctx, 0, 10)
+			got, total, err := dst.Operators(ctx, 0, 10)
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error, "dst.Operators() error")
-
+				require.Zero(t, total, "dst.Operators() should return zero total on error")
 			} else {
-
+				require.NoError(t, err, "dst.Operators() error")
+				require.Greater(t, total, 0, "dst.Operators() should return some total")
 			}
 			if tt.isData {
 				require.NotNil(t, got, "dst.Operators() should return data")

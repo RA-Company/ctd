@@ -22,9 +22,10 @@ func TestCtd_Dialogs(t *testing.T) {
 			State:  "any",
 			Order:  "desc",
 		}
-		got, err := dst.GetDialogs(ctx, params)
+		got, total, err := dst.GetDialogs(ctx, params)
 		require.ErrorIs(t, err, ErrorInvalidToken, "dst.APIGetDialogs() error")
 		require.Nil(t, got, "dst.APIGetDialogs() should return nil data on error")
+		require.Equal(t, 0, total, "dst.APIGetDialogs() should return zero total on error")
 	})
 
 	var dialog_id = int64(0)
@@ -37,11 +38,12 @@ func TestCtd_Dialogs(t *testing.T) {
 			State:  "any",
 			Order:  "desc",
 		}
-		got, err := dst.GetDialogs(ctx, params)
+		got, total, err := dst.GetDialogs(ctx, params)
 		require.NoError(t, err, "dst.APIGetDialogs() error")
 		require.NotNil(t, got, "dst.APIGetDialogs() should return data")
-		require.Greater(t, len(*got), 0, "dst.APIGetDialogs() should return some dialogs")
-		dialog_id = (*got)[0].ID
+		require.Greater(t, len(got), 0, "dst.APIGetDialogs() should return some dialogs")
+		require.Greater(t, total, 0, "dst.APIGetDialogs() should return total dialogs count")
+		dialog_id = got[0].ID
 	})
 
 	t.Run("03 GetDialog Incorrect ID", func(t *testing.T) {

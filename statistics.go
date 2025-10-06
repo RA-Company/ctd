@@ -98,7 +98,7 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 // StatisticsRating retrieves a list of statistic ratings from the Chat2Desk API.
 // It uses the APIStatisticsRating method to fetch the ratings and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a slice of StatisticsRating, which contains the ratings.
+// It returns a slice of StatisticsRating, which contains the ratings.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -107,56 +107,57 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 //   - limit: The maximum number of ratings to return.
 //
 // Returns:
-//   - A pointer to a slice of StatisticsRating containing the list of statistic ratings.
+//   - A slice of StatisticsRating containing the list of statistic ratings.
+//   - The total number of ratings available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) (*[]StatisticsRating, error) {
+func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int, limit int) ([]StatisticsRating, int, error) {
 	data, err := dst.APIStatisticsRating(ctx, date, offset, limit)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	fmt.Printf("StatisticsRating: %+v\n", data)
 
 	if data.Status == "error" {
 		dst.Error(ctx, "Failed to get statistics: %s", data.Errors)
-		return nil, fmt.Errorf("failed to get statistics: %s", data.Errors)
+		return nil, 0, fmt.Errorf("failed to get statistics: %s", data.Errors)
 	}
 
-	return &data.Data, nil
+	return data.Data, data.Meta.Total, nil
 }
 
 // AllStatisticsRating retrieves all statistic ratings from the Chat2Desk API by handling pagination.
 // It repeatedly calls the StatisticsRating method with increasing offsets until all ratings are fetched.
-// It returns a pointer to a slice of StatisticsRating, which contains all the ratings.
+// It returns a slice of StatisticsRating, which contains all the ratings.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - date: The date for which to retrieve statistics. If zero, the current date is used.
 //
 // Returns:
-//   - A pointer to a slice of StatisticsRating containing all the statistic ratings.
+//   - A slice of StatisticsRating containing all the statistic ratings.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) AllStatisticsRating(ctx context.Context, date time.Time) (*[]StatisticsRating, error) {
+func (dst *Ctd) AllStatisticsRating(ctx context.Context, date time.Time) ([]StatisticsRating, error) {
 	ratings := []StatisticsRating{}
 	offset := 0
 	limit := 200
 
 	for {
-		data, err := dst.StatisticsRating(ctx, date, offset, limit)
+		data, _, err := dst.StatisticsRating(ctx, date, offset, limit)
 		if err != nil {
 			return nil, err
 		}
 
-		if data == nil || len(*data) == 0 {
+		if len(data) == 0 {
 			break
 		}
 
-		ratings = append(ratings, *data...)
-		if len(*data) < limit {
+		ratings = append(ratings, data...)
+		if len(data) < limit {
 			break
 		}
 		offset += limit
 	}
 
-	return &ratings, nil
+	return ratings, nil
 }

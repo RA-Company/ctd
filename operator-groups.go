@@ -48,7 +48,7 @@ func (dst *Ctd) APIOperatorGroups(ctx context.Context) (*OperatorGroupsResponse,
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A pointer to a slice of OperatorGroup containing the list of operator groups.
+//   - A slice of OperatorGroup containing the list of operator groups.
 //   - An error if the request fails or if the response is invalid.
 func (dst *Ctd) OperatorGroups(ctx context.Context) ([]OperatorGroup, error) {
 	data, err := dst.APIOperatorGroups(ctx)

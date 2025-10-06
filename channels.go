@@ -68,7 +68,7 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 // GetChannels retrieves a list of channels from the Chat2Desk API.
 // It uses the Channels method to fetch the channels and handles errors.
 // If the response status is not "success", it logs an error and returns nil.
-// It returns a pointer to a slice of ChannelItem, which contains the channels.
+// It returns a slice of ChannelItem, which contains the channels.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -76,25 +76,20 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 //   - limit: The maximum number of channels to return.
 //
 // Returns:
-//   - A pointer to a slice of ChannelItem containing the channels.
+//   - A slice of ChannelItem containing the channels.
+//   - The total number of channels available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-//
-// This function is a wrapper around the Channels method to provide a more user-friendly interface.
-// It simplifies the process of fetching channels by handling the response and error checking.
-// It is useful for applications that need to retrieve channels from the Chat2Desk API
-// in a straightforward manner without dealing with the raw response data.
-// It is designed to be used in contexts where channels need to be displayed or processed further.
-func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) (*[]ChannelItem, error) {
+func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) ([]ChannelItem, int, error) {
 	response, err := dst.Channels(ctx, offset, limit)
 	if err != nil {
 		dst.Error(ctx, "Failed to get channels: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	if response.Status != "success" {
 		dst.Error(ctx, "Invalid response status: %s", response.Status)
-		return nil, ErrorInvalidResponse
+		return nil, 0, ErrorInvalidResponse
 	}
 
-	return &response.Data, nil
+	return response.Data, response.Meta.Total, nil
 }
