@@ -61,4 +61,12 @@ func TestCtdApi_Operators(t *testing.T) {
 
 		})
 	}
+
+	t.Run("OperatorsStatuses", func(t *testing.T) {
+		dst := &Ctd{}
+		dst.Init(url, token)
+		got, err := dst.APIOperatorStatuses(ctx)
+		require.NoError(t, err, "dst.OperatorsStatuses() error")
+		require.NotNil(t, got, "dst.OperatorsStatuses() should return data")
+	})
 }

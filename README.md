@@ -626,6 +626,25 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
+```func (*Ctd).APIOperatorStatuses(ctx context.Context) ([]OperatorStatus, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIOperatorStatuses retrieves a list of operator statuses from the Chat2Desk API.
+It constructs the API endpoint URL, sends a GET request to the API,
+and returns the response data as an OperatorStatuses struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the OperatorStatuses struct.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+
+Returns:
+  - A slice of OperatorStatuses structs containing the list of operator statuses.
+  - An error if the request fails or if the response is invalid.
+</details>
+
 ```func (*Ctd).Operators(ctx context.Context, offset int, limit int) ([]Operator, int, error)```
 
 <details>

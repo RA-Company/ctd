@@ -23,6 +23,11 @@ type OperatorsResponse struct {
 	BasicResponse
 }
 
+type OperatorStatus struct {
+	ID   int64             `json:"id"`
+	Name map[string]string `json:"name"`
+}
+
 // APIOperators retrieves a list of operators from the Chat2Desk API.
 // It constructs the API endpoint URL with the provided offset and limit,
 // sends a GET request to the API, and returns the response data as a OperatorsResponse struct.
@@ -48,6 +53,31 @@ func (dst *Ctd) APIOperators(ctx context.Context, offset int, limit int) (*Opera
 	}
 
 	return &response, nil
+}
+
+// APIOperatorStatuses retrieves a list of operator statuses from the Chat2Desk API.
+// It constructs the API endpoint URL, sends a GET request to the API,
+// and returns the response data as an OperatorStatuses struct.
+// If an error occurs during the request, it logs the error and returns it.
+// If the request is successful, it returns a pointer to the OperatorStatuses struct.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//
+// Returns:
+//   - A slice of OperatorStatuses structs containing the list of operator statuses.
+//   - An error if the request fails or if the response is invalid.
+func (dst *Ctd) APIOperatorStatuses(ctx context.Context) ([]OperatorStatus, error) {
+	url := fmt.Sprintf("%sv1/operators/statuses", dst.Url)
+
+	response := []OperatorStatus{}
+
+	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
+		dst.Error(ctx, "Failed to get operator statuses: %v", err)
+		return nil, err
+	}
+
+	return response, nil
 }
 
 // Operators retrieves a list of operators from the Chat2Desk API.
