@@ -6,17 +6,17 @@ import (
 )
 
 type CustomClientFieldResponse struct {
-	Status  string                  `json:"status"`           // Status: Status of the response
-	Data    []CustomClientFieldItem `json:"data"`             // Data: List of custom client fields
-	Message string                  `json:"message"`          // Message: Additional message from the API
-	Errors  string                  `json:"errors,omitempty"` // Errors: List of errors, if any
+	Status  string              `json:"status"`           // Status: Status of the response
+	Data    []CustomClientField `json:"data"`             // Data: List of custom client fields
+	Message string              `json:"message"`          // Message: Additional message from the API
+	Errors  string              `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
-// CustomClientFieldItem represents a single custom client field in the Chat2Desk API.
+// CustomClientField represents a single custom client field in the Chat2Desk API.
 // It contains various fields that describe the custom client field, such as ID, name, type,
 // value, and whether it is editable, viewable, or a tracking field.
 // This struct is used to represent custom fields that can be associated with clients in the Chat2Desk system.
-type CustomClientFieldItem struct {
+type CustomClientField struct {
 	ID            int    `json:"id"`             // ID: Unique identifier for the custom client field
 	Name          string `json:"name"`           // Name: Name of the custom client field
 	Type          string `json:"type"`           // Type: Type of the custom client field (e.g., text, number, date)
@@ -53,15 +53,15 @@ func (dst *Ctd) APICustomClientFields(ctx context.Context) (*CustomClientFieldRe
 // GetCustomClientFields retrieves a list of custom client fields from the Chat2Desk API.
 // It uses the APICustomClientFields method to fetch the custom client fields and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a slice of CustomClientFieldItem, which contains the custom client fields.
+// It returns a pointer to a slice of CustomClientField, which contains the custom client fields.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A slice of CustomClientFieldItem containing the custom client fields.
+//   - A slice of CustomClientField containing the custom client fields.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetCustomClientFields(ctx context.Context) ([]CustomClientFieldItem, error) {
+func (dst *Ctd) GetCustomClientFields(ctx context.Context) ([]CustomClientField, error) {
 	response, err := dst.APICustomClientFields(ctx)
 	if err != nil {
 		return nil, err

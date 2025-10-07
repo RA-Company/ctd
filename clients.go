@@ -8,24 +8,24 @@ import (
 
 // ClientResponse represents the response structure for client-related API calls.
 type ClientResponse struct {
-	Data    ClientItem `json:"data"` // Data: List of clients
-	Message string     `json:"message"`
-	Errors  any        `json:"errors,omitempty"` // Errors: List of errors,
-	Status  string     `json:"status"`
+	Data    Client `json:"data"` // Data: List of clients
+	Message string `json:"message"`
+	Errors  any    `json:"errors,omitempty"` // Errors: List of errors,
+	Status  string `json:"status"`
 }
 
 type ClientsResponse struct {
-	Data    []ClientItem `json:"data"` // Data: List of clients
+	Data    []Client     `json:"data"` // Data: List of clients
 	Meta    MetaResponse `json:"meta"`
 	Message string       `json:"message"`
 	Errors  string       `json:"errors,omitempty"` // Errors: List of errors,
 	Status  string       `json:"status"`
 }
 
-// ClientItem represents a single client in the Chat2Desk API.
+// Client represents a single client in the Chat2Desk API.
 // It contains various fields that describe the client, such as ID, name, phone number,
 // avatar, region, country, messages, comments, custom fields, and associated channels and tags.
-type ClientItem struct {
+type Client struct {
 	ID                    int               `json:"id"`                   // ID: Unique identifier of the client
 	Name                  string            `json:"name"`                 // Name: Name of the client
 	Username              string            `json:"username"`             // Username: Username of the client
@@ -45,8 +45,8 @@ type ClientItem struct {
 	ClientExternalID      string            `json:"client_external_id"`   // ClientExternalID: External ID of the client
 	ExtrnalID             int               `json:"external_id"`          // ExternalID: External ID of the client
 	ExtrnalIDs            map[string]int    `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client
-	Channels              []ChannelItem     `json:"channels"`             // Channels: List of channels associated with the client
-	Tags                  []TagItem         `json:"tags"`                 // Tags: List of tags associated with the client
+	Channels              []Channel         `json:"channels"`             // Channels: List of channels associated with the client
+	Tags                  []Tag             `json:"tags"`                 // Tags: List of tags associated with the client
 }
 
 // APIGetClient retrieves a client by its ID from the Chat2Desk API.
@@ -157,16 +157,16 @@ func (dst *Ctd) APICreateClient(ctx context.Context, phone, transport string, ch
 // It takes a context and the client ID as parameters.
 // It calls the APIGetClient method to fetch the client data.
 // If the response contains an error or if no client data is found, it returns an error.
-// If the client is found, it returns a pointer to the ClientItem struct containing the client details.
+// If the client is found, it returns a pointer to the Client struct containing the client details.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - id: The ID of the client to retrieve.
 //
 // Returns:
-//   - A pointer to a ClientItem struct containing the client details.
+//   - A pointer to a Client struct containing the client details.
 //   - An error if the request fails, if the response is invalid, or if no client data is found.
-func (dst *Ctd) GetClient(ctx context.Context, id int) (*ClientItem, error) {
+func (dst *Ctd) GetClient(ctx context.Context, id int) (*Client, error) {
 	response, err := dst.APIGetClient(ctx, id)
 	if err != nil {
 		return nil, err
@@ -186,7 +186,7 @@ func (dst *Ctd) GetClient(ctx context.Context, id int) (*ClientItem, error) {
 // GetClients retrieves a list of clients from the Chat2Desk API.
 // It uses the APIGetClients method to fetch the clients and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a slice of ClientItem, which contains the clients.
+// It returns a pointer to a slice of Client, which contains the clients.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -194,10 +194,10 @@ func (dst *Ctd) GetClient(ctx context.Context, id int) (*ClientItem, error) {
 //   - limit: The maximum number of clients to return.
 //
 // Returns:
-//   - A slice of ClientItem containing the clients.
+//   - A slice of Client containing the clients.
 //   - The total number of clients available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]ClientItem, int, error) {
+func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]Client, int, error) {
 	response, err := dst.APIGetClients(ctx, offset, limit, "asc", "")
 	if err != nil {
 		return nil, 0, err
@@ -218,7 +218,7 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]Client
 // It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
 // It calls the APICreateClient method to create the client and handles errors.
 // If the response status is not "success", it sets the last error and returns an error.
-// If the client is created successfully, it returns a pointer to the ClientItem struct containing the client details.
+// If the client is created successfully, it returns a pointer to the Client struct containing the client details.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -229,9 +229,9 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]Client
 //   - assigned_phone: The phone number assigned to the client (optional).
 //
 // Returns:
-//   - A pointer to a ClientItem struct containing the client details.
+//   - A pointer to a Client struct containing the client details.
 //   - An error if the request fails, if the response is invalid, or if the client could not be created.
-func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientItem, error) {
+func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*Client, error) {
 	response, err := dst.APICreateClient(ctx, phone, transport, channel_id, nickname, assigned_phone)
 	if err != nil {
 		return nil, err

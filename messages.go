@@ -35,13 +35,13 @@ type MessagePayload struct {
 }
 
 type SendMessageResponse struct {
-	Data    SendMessageItem `json:"data"` // Data: List of clients
-	Message string          `json:"message"`
-	Errors  any             `json:"errors,omitempty"` // Errors: List of errors,
-	Status  string          `json:"status"`
+	Data    SendMessage `json:"data"` // Data: List of clients
+	Message string      `json:"message"`
+	Errors  any         `json:"errors,omitempty"` // Errors: List of errors,
+	Status  string      `json:"status"`
 }
 
-type SendMessageItem struct {
+type SendMessage struct {
 	MessageID  int    `json:"message_id"`  // MessageID: Unique message ID
 	ChannelID  int    `json:"channel_id"`  // ChannelID: Channel ID
 	OperatorID int    `json:"operator_id"` // OperatorID: Operator ID
@@ -57,7 +57,7 @@ type MessageAttachment struct {
 	Link string `json:"link"` // Link: Attachment link
 }
 
-type MessageItem struct {
+type Message struct {
 	ID              int                 `json:"id"`               // ID: Unique message ID
 	Coordinates     string              `json:"coordinates"`      // Coordinates: Message coordinates (if any)
 	Transport       string              `json:"transport"`        // Transport: Transport
@@ -108,16 +108,16 @@ func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*S
 }
 
 // SendMessage sends a message to the API.
-// It takes a context and a MessagePayload, and returns a MessageItem or an error.
+// It takes a context and a MessagePayload, and returns a Message or an error.
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
 //   - message (MessagePayload): The message payload to send.
 //
 // Returns:
-//   - A pointer to a MessageItem containing the response data.
+//   - A pointer to a Message containing the response data.
 //   - An error if the request fails.
-func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*SendMessageItem, error) {
+func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*SendMessage, error) {
 	data, err := dst.APISendMessage(ctx, message)
 	if err != nil {
 		return nil, err

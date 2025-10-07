@@ -72,7 +72,7 @@ func TestCtd_Tags(t *testing.T) {
 		limit := 10
 		total := 0
 		var (
-			got []TagItem
+			got []Tag
 			err error
 		)
 

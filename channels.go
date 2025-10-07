@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-// ChannelItem represents a single channel in the Chat2Desk API
+// Channel represents a single channel in the Chat2Desk API
 // with its ID, name, phone number, and transports.
 // It is used in the ChannelsResponse to provide a list of channels.
-type ChannelItem struct {
+type Channel struct {
 	ID         int      `json:"id"`              // ID: Unique identifier of the channel
 	Name       string   `json:"name,omitempty"`  // Name: Name of the channel
 	Phone      string   `json:"phone,omitempty"` // Phone: Phone number associated with the channel
@@ -18,14 +18,14 @@ type ChannelItem struct {
 // ChannelsResponse represents the response from the Chat2Desk API
 // when fetching channels. It includes metadata about the response
 // and a status message.
-// It contains a list of ChannelItem objects that represent the channels.
+// It contains a list of Channel objects that represent the channels.
 // The MetaResponse provides pagination information such as total count,
 // limit, and offset for the channels returned.
 // It is used to encapsulate the response structure for the Channels API endpoint.
 type ChannelsResponse struct {
-	Data   []ChannelItem `json:"data"` // Data: List of channels
-	Meta   MetaResponse  `json:"meta"`
-	Status string        `json:"status"`
+	Data   []Channel    `json:"data"` // Data: List of channels
+	Meta   MetaResponse `json:"meta"`
+	Status string       `json:"status"`
 }
 
 // Channels retrieves a list of channels from the Chat2Desk API.
@@ -68,7 +68,7 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 // GetChannels retrieves a list of channels from the Chat2Desk API.
 // It uses the Channels method to fetch the channels and handles errors.
 // If the response status is not "success", it logs an error and returns nil.
-// It returns a slice of ChannelItem, which contains the channels.
+// It returns a slice of Channel, which contains the channels.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -76,10 +76,10 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 //   - limit: The maximum number of channels to return.
 //
 // Returns:
-//   - A slice of ChannelItem containing the channels.
+//   - A slice of Channel containing the channels.
 //   - The total number of channels available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) ([]ChannelItem, int, error) {
+func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) ([]Channel, int, error) {
 	response, err := dst.Channels(ctx, offset, limit)
 	if err != nil {
 		dst.Error(ctx, "Failed to get channels: %v", err)

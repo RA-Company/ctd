@@ -11,21 +11,21 @@ import (
 
 type DialogResponse struct {
 	BasicResponse
-	Data DialogItem `json:"data"` // Data: List of clients
+	Data Dialog `json:"data"` // Data: List of clients
 }
 
 type DialogsResponse struct {
 	BasicResponse
-	Data []DialogItem `json:"data"` // Data: List of clients
+	Data []Dialog     `json:"data"` // Data: List of clients
 	Meta MetaResponse `json:"meta"` // Meta: Meta information
 }
 
-type DialogItem struct {
+type Dialog struct {
 	ID            int64       `json:"id"`              // ID: Dialog ID
 	State         string      `json:"state"`           // State: Dialog state
 	Begin         jsons.Time  `json:"begin"`           // Begin: Dialog begin time
 	End           jsons.Time  `json:"end"`             // End: Dialog end time
-	LastMessage   MessageItem `json:"last_message"`    // LastMessage: Last message in dialog
+	LastMessage   Message     `json:"last_message"`    // LastMessage: Last message in dialog
 	LastRequestID int64       `json:"last_request_id"` // LastRequestID: Last request ID
 	Messages      json.Number `json:"messages"`        // Messages: Number of messages in dialog
 	OperatorID    int64       `json:"operator_id"`     // OperatorID: Operator ID
@@ -111,17 +111,17 @@ func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogRespo
 }
 
 // GetDialogs retrieves a list of dialogs.
-// It takes a context and GetDialogsParams, and returns a slice of DialogItem or an error.
+// It takes a context and GetDialogsParams, and returns a slice of Dialog or an error.
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
 //   - params (*GetDialogsParams): The parameters for filtering and pagination.
 //
 // Returns:
-//   - A slice of DialogItem containing the dialogs.
+//   - A slice of Dialog containing the dialogs.
 //   - The total number of dialogs available (for pagination).
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]DialogItem, int, error) {
+func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dialog, int, error) {
 	data, err := dst.APIGetDialogs(ctx, params)
 	if err != nil {
 		return nil, 0, err
@@ -136,16 +136,16 @@ func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dia
 }
 
 // GetDialog retrieves a dialog by its ID.
-// It takes a context and a dialog ID, and returns a DialogItem or an error.
+// It takes a context and a dialog ID, and returns a Dialog or an error.
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
 //   - dialog_id (int64): The ID of the dialog to retrieve.
 //
 // Returns:
-//   - A pointer to a DialogItem containing the dialog data.
+//   - A pointer to a Dialog containing the dialog data.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*DialogItem, error) {
+func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error) {
 	data, err := dst.APIGetDialog(ctx, dialog_id)
 	if err != nil {
 		return nil, err

@@ -7,22 +7,22 @@ import (
 )
 
 // WebhooksResponse represents the response from the Chat2Desk API
-// when fetching webhooks. It includes a list of WebhookItem objects
+// when fetching webhooks. It includes a list of Webhook objects
 // that represent the webhooks and a status message.
 // It is used to encapsulate the response structure for the Webhooks API endpoint.
 type WebhooksResponse struct {
-	Data   []WebhookItem `json:"data"` // Data: List of webhooks
-	Status string        `json:"status"`
+	Data   []Webhook `json:"data"` // Data: List of webhooks
+	Status string    `json:"status"`
 }
 
 // CreateWebhookResponse represents the response from the Chat2Desk API
-// when fetching a single webhook. It includes a WebhookItem object
+// when fetching a single webhook. It includes a Webhook object
 // that represents the webhook and a status message.
 // It is used to encapsulate the response structure for the CreateWebhook API endpoint.
 type CreateWebhookResponse struct {
-	Data    WebhookItem `json:"data"` // Data: Single webhook item
-	Status  string      `json:"status"`
-	Message string      `json:"message,omitempty"` // Message: Optional message providing additional information
+	Data    Webhook `json:"data"` // Data: Single webhook item
+	Status  string  `json:"status"`
+	Message string  `json:"message,omitempty"` // Message: Optional message providing additional information
 	Errors  struct {
 		Url    []string `json:"url,omitempty"`    // Url: List of errors related to the URL
 		Order  []string `json:"order,omitempty"`  // Order: List of errors related to the order
@@ -78,10 +78,10 @@ type DeleteWebhookResponse struct {
 	Errors  string `json:"errors,omitempty"`  // Errors: Optional field containing errors related to the delete operation
 }
 
-// WebhookItem represents a single webhook in the Chat2Desk API
+// Webhook represents a single webhook in the Chat2Desk API
 // with its ID, name, URL, and transports.
 // It is used in the WebhooksResponse to provide a list of webhooks.
-type WebhookItem struct {
+type Webhook struct {
 	ID       int             `json:"id"`       // ID: Unique identifier of the webhook
 	Name     string          `json:"name"`     // Name: Name of the webhook
 	URL      string          `json:"url"`      // URL: The URL to which the webhook
@@ -245,18 +245,18 @@ func (dst *Ctd) DeleteWebhooks(ctx context.Context, id int) (*DeleteWebhookRespo
 // GetWebhooks retrieves a list of webhooks from the Chat2Desk API.
 // It takes a context as a parameter and calls the Webhooks method.
 // If the response status is not "success", it logs an error and returns nil.
-// It returns a slice of WebhookItem, which contains the webhooks.
+// It returns a slice of Webhook, which contains the webhooks.
 // If an error occurs during the request, it returns nil and the error.
-// If the request is successful, it returns a pointer to a slice of WebhookItem.
+// If the request is successful, it returns a pointer to a slice of Webhook.
 // This method is typically used to fetch webhooks from the Chat2Desk API.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A slice of WebhookItem containing the webhooks.
+//   - A slice of Webhook containing the webhooks.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetWebhooks(ctx context.Context) ([]WebhookItem, error) {
+func (dst *Ctd) GetWebhooks(ctx context.Context) ([]Webhook, error) {
 	response, err := dst.Webhooks(ctx)
 	if err != nil {
 		return nil, err
@@ -275,7 +275,7 @@ func (dst *Ctd) GetWebhooks(ctx context.Context) ([]WebhookItem, error) {
 // It calls the PostWebhook method to send the request.
 // If the response status is not "success", it logs an error and returns nil.
 // If the URL is already used, it returns an error indicating that the URL is already used.
-// If the request is successful, it returns a pointer to the created WebhookItem.
+// If the request is successful, it returns a pointer to the created Webhook.
 // This method is typically used to create new webhooks in the Chat2Desk API.
 //
 // Parameters:
@@ -283,9 +283,9 @@ func (dst *Ctd) GetWebhooks(ctx context.Context) ([]WebhookItem, error) {
 //   - payload: The WebhookPayload containing the details of the webhook to be created.
 //
 // Returns:
-//   - A pointer to a WebhookItem containing the created webhook.
+//   - A pointer to a Webhook containing the created webhook.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) CreateWebhook(ctx context.Context, payload *WebhookPayload) (*WebhookItem, error) {
+func (dst *Ctd) CreateWebhook(ctx context.Context, payload *WebhookPayload) (*Webhook, error) {
 	response, err := dst.PostWebhooks(ctx, payload)
 	if err != nil {
 		return nil, err
@@ -304,7 +304,7 @@ func (dst *Ctd) CreateWebhook(ctx context.Context, payload *WebhookPayload) (*We
 // It calls the PutWebhooks method to send the request.
 // If the response status is not "success", it logs an error and returns nil.
 // If the URL is already used, it returns an error indicating that the URL is already used.
-// If the request is successful, it returns a pointer to the updated WebhookItem.
+// If the request is successful, it returns a pointer to the updated Webhook.
 // This method is typically used to update existing webhooks in the Chat2Desk API.
 //
 // Parameters:
@@ -313,9 +313,9 @@ func (dst *Ctd) CreateWebhook(ctx context.Context, payload *WebhookPayload) (*We
 //   - payload: The WebhookPayload containing the updated details of the webhook.
 //
 // Returns:
-//   - A pointer to a WebhookItem containing the updated webhook.
+//   - A pointer to a Webhook containing the updated webhook.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) UpdateWebhook(ctx context.Context, id int, payload *WebhookPayload) (*WebhookItem, error) {
+func (dst *Ctd) UpdateWebhook(ctx context.Context, id int, payload *WebhookPayload) (*Webhook, error) {
 	response, err := dst.PutWebhooks(ctx, id, payload)
 	if err != nil {
 		return nil, err

@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-type CompaniesApiInfoData struct {
+type CompaniesApiInfo struct {
 	CompanyID   int64  `json:"companyID"`
 	PartnerID   int64  `json:"partnerID"`
 	CompanyName string `json:"company_name"`
@@ -12,10 +12,10 @@ type CompaniesApiInfoData struct {
 }
 
 type CompaniesApiInfoResponse struct {
-	Status  string               `json:"status"`           // Status: Status of the response
-	Data    CompaniesApiInfoData `json:"data"`             // Data: Information about the company
-	Message string               `json:"message"`          // Message: Additional message from the API
-	Errors  string               `json:"errors,omitempty"` // Errors: List of errors, if any
+	Status  string           `json:"status"`           // Status: Status of the response
+	Data    CompaniesApiInfo `json:"data"`             // Data: Information about the company
+	Message string           `json:"message"`          // Message: Additional message from the API
+	Errors  string           `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // APIGetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
@@ -40,11 +40,11 @@ func (dst *Ctd) APICompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoRespo
 // GetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
 // It uses the APICompaniesApiInfo method to fetch the company information and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a CompaniesApiInfoData struct, which contains the company information.
+// It returns a pointer to a CompaniesApiInfo struct, which contains the company information.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-func (dst *Ctd) CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoData, error) {
+func (dst *Ctd) CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfo, error) {
 	data, err := dst.APICompaniesApiInfo(ctx)
 	if err != nil {
 		return nil, err

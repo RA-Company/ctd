@@ -184,7 +184,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetChannels(ctx context.Context, offset int, limit int) ([]ChannelItem, int, error)```
+```func (*Ctd).GetChannels(ctx context.Context, offset int, limit int) ([]Channel, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -192,7 +192,7 @@ Returns:
 GetChannels retrieves a list of channels from the Chat2Desk API.
 It uses the Channels method to fetch the channels and handles errors.
 If the response status is not "success", it logs an error and returns nil.
-It returns a slice of ChannelItem, which contains the channels.
+It returns a slice of Channel, which contains the channels.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -200,7 +200,7 @@ Parameters:
   - limit: The maximum number of channels to return.
 
 Returns:
-  - A slice of ChannelItem containing the channels.
+  - A slice of Channel containing the channels.
   - The total number of channels available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
@@ -285,7 +285,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetClient(ctx context.Context, id int) (*ClientItem, error)```
+```func (*Ctd).GetClient(ctx context.Context, id int) (*Client, error)```
 
 <details>
 <summary>Function description</summary>
@@ -294,18 +294,18 @@ GetClient retrieves a client by its ID from the Chat2Desk API.
 It takes a context and the client ID as parameters.
 It calls the APIGetClient method to fetch the client data.
 If the response contains an error or if no client data is found, it returns an error.
-If the client is found, it returns a pointer to the ClientItem struct containing the client details.
+If the client is found, it returns a pointer to the Client struct containing the client details.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
   - id: The ID of the client to retrieve.
 
 Returns:
-  - A pointer to a ClientItem struct containing the client details.
+  - A pointer to a Client struct containing the client details.
   - An error if the request fails, if the response is invalid, or if no client data is found.
 </details>
 
-```func (*Ctd).GetClientsList(ctx context.Context, offset int, limit int) ([]ClientItem, int, error)```
+```func (*Ctd).GetClientsList(ctx context.Context, offset int, limit int) ([]Client, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -313,7 +313,7 @@ Returns:
 GetClients retrieves a list of clients from the Chat2Desk API.
 It uses the APIGetClients method to fetch the clients and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a slice of ClientItem, which contains the clients.
+It returns a pointer to a slice of Client, which contains the clients.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -321,12 +321,12 @@ Parameters:
   - limit: The maximum number of clients to return.
 
 Returns:
-  - A slice of ClientItem containing the clients.
+  - A slice of Client containing the clients.
   - The total number of clients available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).CreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientItem, error)```
+```func (*Ctd).CreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*Client, error)```
 
 <details>
 <summary>Function description</summary>
@@ -335,7 +335,7 @@ CreateClient creates a new client in the Chat2Desk API.
 It takes a context, phone number, transport type, channel ID, nickname, and assigned phone as parameters.
 It calls the APICreateClient method to create the client and handles errors.
 If the response status is not "success", it sets the last error and returns an error.
-If the client is created successfully, it returns a pointer to the ClientItem struct containing the client details.
+If the client is created successfully, it returns a pointer to the Client struct containing the client details.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -346,7 +346,7 @@ Parameters:
   - assigned_phone: The phone number assigned to the client (optional).
 
 Returns:
-  - A pointer to a ClientItem struct containing the client details.
+  - A pointer to a Client struct containing the client details.
   - An error if the request fails, if the response is invalid, or if the client could not be created.
 </details>
 
@@ -372,7 +372,7 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 </details>
 
-```func (*Ctd).CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoData, error)```
+```func (*Ctd).CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfo, error)```
 
 <details>
 <summary>Function description</summary>
@@ -380,7 +380,7 @@ Parameters:
 GetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
 It uses the APICompaniesApiInfo method to fetch the company information and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a CompaniesApiInfoData struct, which contains the company information.
+It returns a pointer to a CompaniesApiInfo struct, which contains the company information.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -412,7 +412,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetCustomClientFields(ctx context.Context) ([]CustomClientFieldItem, error)```
+```func (*Ctd).GetCustomClientFields(ctx context.Context) ([]CustomClientField, error)```
 
 <details>
 <summary>Function description</summary>
@@ -420,13 +420,13 @@ Returns:
 GetCustomClientFields retrieves a list of custom client fields from the Chat2Desk API.
 It uses the APICustomClientFields method to fetch the custom client fields and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a slice of CustomClientFieldItem, which contains the custom client fields.
+It returns a pointer to a slice of CustomClientField, which contains the custom client fields.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A slice of CustomClientFieldItem containing the custom client fields.
+  - A slice of CustomClientField containing the custom client fields.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -478,38 +478,38 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) ([]DialogItem, int, error)```
+```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dialog, int, error)```
 
 <details>
 <summary>Function description</summary>
 
 GetDialogs retrieves a list of dialogs.
-It takes a context and GetDialogsParams, and returns a slice of DialogItem or an error.
+It takes a context and GetDialogsParams, and returns a slice of Dialog or an error.
 
 Parameters:
   - ctx (context.Context): The context for the request.
   - params (*GetDialogsParams): The parameters for filtering and pagination.
 
 Returns:
-  - A slice of DialogItem containing the dialogs.
+  - A slice of Dialog containing the dialogs.
   - The total number of dialogs available (for pagination).
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetDialog(ctx context.Context, dialog_id int64) (*DialogItem, error)```
+```func (*Ctd).GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error)```
 
 <details>
 <summary>Function description</summary>
 
 GetDialog retrieves a dialog by its ID.
-It takes a context and a dialog ID, and returns a DialogItem or an error.
+It takes a context and a dialog ID, and returns a Dialog or an error.
 
 Parameters:
   - ctx (context.Context): The context for the request.
   - dialog_id (int64): The ID of the dialog to retrieve.
 
 Returns:
-  - A pointer to a DialogItem containing the dialog data.
+  - A pointer to a Dialog containing the dialog data.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -537,20 +537,20 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*SendMessageItem, error)```
+```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*SendMessage, error)```
 
 <details>
 <summary>Function description</summary>
 
 SendMessage sends a message to the API.
-It takes a context and a MessagePayload, and returns a MessageItem or an error.
+It takes a context and a MessagePayload, and returns a Message or an error.
 
 Parameters:
   - ctx (context.Context): The context for the request.
   - message (MessagePayload): The message payload to send.
 
 Returns:
-  - A pointer to a MessageItem containing the response data.
+  - A pointer to a Message containing the response data.
   - An error if the request fails.
 </details>
 
@@ -798,7 +798,7 @@ Returns:
 
 GetTags retrieves a list of tags from the Chat2Desk API.
 It uses the APIGetTags method to fetch the tags and handles errors.
-It returns a pointer to a slice of TagItem, which contains the tags.
+It returns a pointer to a slice of Tag, which contains the tags.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -829,7 +829,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetTags(ctx context.Context, offset int, limit int) ([]TagItem, int, error)```
+```func (*Ctd).GetTags(ctx context.Context, offset int, limit int) ([]Tag, int, error)```
 
 <details>
 <summary>Function description</summary>
@@ -837,7 +837,7 @@ Returns:
 GetTags retrieves a list of tags from the Chat2Desk API.
 It uses the APIGetTags method to fetch the tags and handles errors.
 If the response status is not "success", it returns nil.
-It returns a slice of TagItem, which contains the tags.
+It returns a slice of Tag, which contains the tags.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -845,12 +845,12 @@ Parameters:
   - limit: The maximum number of tags to retrieve.
 
 Returns:
-  - A slice of TagItem, which contains the tags
+  - A slice of Tag, which contains the tags
   - The total number of tags available.
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetTag(ctx context.Context, id int) (*TagItem, error)```
+```func (*Ctd).GetTag(ctx context.Context, id int) (*Tag, error)```
 
 <details>
 <summary>Function description</summary>
@@ -858,31 +858,31 @@ Returns:
 GetTag retrieves a specific tag by its ID from the Chat2Desk API.
 It uses the APIGetTag method to fetch the tag and handles errors.
 If the response status is not "success", it returns nil.
-It returns a pointer to a TagItem, which contains the tag data.
+It returns a pointer to a Tag, which contains the tag data.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
   - id: The ID of the tag to retrieve.
 
 Returns:
-  - A pointer to a TagItem, which contains the tag data
+  - A pointer to a Tag, which contains the tag data
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetAllTags(ctx context.Context) ([]TagItem, error)```
+```func (*Ctd).GetAllTags(ctx context.Context) ([]Tag, error)```
 
 <details>
 <summary>Function description</summary>
 
 GetAllTags retrieves all tags from the Chat2Desk API.
 It uses the GetTags method to fetch tags in a loop until all tags are retrieved.
-It returns a slice of TagItem, which contains all the tags.
+It returns a slice of Tag, which contains all the tags.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A slice of TagItem, which contains all the tags.
+  - A slice of Tag, which contains all the tags.
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -1011,7 +1011,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetWebhooks(ctx context.Context) ([]WebhookItem, error)```
+```func (*Ctd).GetWebhooks(ctx context.Context) ([]Webhook, error)```
 
 <details>
 <summary>Function description</summary>
@@ -1019,20 +1019,20 @@ Returns:
 GetWebhooks retrieves a list of webhooks from the Chat2Desk API.
 It takes a context as a parameter and calls the Webhooks method.
 If the response status is not "success", it logs an error and returns nil.
-It returns a slice of WebhookItem, which contains the webhooks.
+It returns a slice of Webhook, which contains the webhooks.
 If an error occurs during the request, it returns nil and the error.
-If the request is successful, it returns a pointer to a slice of WebhookItem.
+If the request is successful, it returns a pointer to a slice of Webhook.
 This method is typically used to fetch webhooks from the Chat2Desk API.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
 
 Returns:
-  - A slice of WebhookItem containing the webhooks.
+  - A slice of Webhook containing the webhooks.
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).CreateWebhook(ctx context.Context, payload *WebhookPayload) (*WebhookItem, error)```
+```func (*Ctd).CreateWebhook(ctx context.Context, payload *WebhookPayload) (*Webhook, error)```
 
 <details>
 <summary>Function description</summary>
@@ -1042,7 +1042,7 @@ It takes a context and a WebhookPayload as parameters.
 It calls the PostWebhook method to send the request.
 If the response status is not "success", it logs an error and returns nil.
 If the URL is already used, it returns an error indicating that the URL is already used.
-If the request is successful, it returns a pointer to the created WebhookItem.
+If the request is successful, it returns a pointer to the created Webhook.
 This method is typically used to create new webhooks in the Chat2Desk API.
 
 Parameters:
@@ -1050,11 +1050,11 @@ Parameters:
   - payload: The WebhookPayload containing the details of the webhook to be created.
 
 Returns:
-  - A pointer to a WebhookItem containing the created webhook.
+  - A pointer to a Webhook containing the created webhook.
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).UpdateWebhook(ctx context.Context, id int, payload *WebhookPayload) (*WebhookItem, error)```
+```func (*Ctd).UpdateWebhook(ctx context.Context, id int, payload *WebhookPayload) (*Webhook, error)```
 
 <details>
 <summary>Function description</summary>
@@ -1064,7 +1064,7 @@ It takes a context, the webhook ID, and a WebhookPayload as parameters.
 It calls the PutWebhooks method to send the request.
 If the response status is not "success", it logs an error and returns nil.
 If the URL is already used, it returns an error indicating that the URL is already used.
-If the request is successful, it returns a pointer to the updated WebhookItem.
+If the request is successful, it returns a pointer to the updated Webhook.
 This method is typically used to update existing webhooks in the Chat2Desk API.
 
 Parameters:
@@ -1073,7 +1073,7 @@ Parameters:
   - payload: The WebhookPayload containing the updated details of the webhook.
 
 Returns:
-  - A pointer to a WebhookItem containing the updated webhook.
+  - A pointer to a Webhook containing the updated webhook.
   - An error if the request fails or if the response is invalid.
 </details>
 

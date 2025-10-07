@@ -9,7 +9,7 @@ import (
 // TagsResponse represents the response structure for the tags API.
 type TagsResponse struct {
 	Status  string       `json:"status"`           // Status: Status of the response
-	Data    []TagItem    `json:"data"`             // Data: List of tags
+	Data    []Tag        `json:"data"`             // Data: List of tags
 	Meta    MetaResponse `json:"meta"`             // Meta: Metadata about the response
 	Message string       `json:"message"`          // Message: Additional message from the API
 	Errors  string       `json:"errors,omitempty"` // Errors: List of errors, if any
@@ -17,14 +17,14 @@ type TagsResponse struct {
 
 // MetaResponse contains metadata about the API response.
 type TagResponse struct {
-	Status  string  `json:"status"`           // Status: Status of the response
-	Data    TagItem `json:"data"`             // Data: The tag item
-	Message string  `json:"message"`          // Message: Additional message from the API
-	Errors  string  `json:"errors,omitempty"` // Errors: List of errors, if any
+	Status  string `json:"status"`           // Status: Status of the response
+	Data    Tag    `json:"data"`             // Data: The tag item
+	Message string `json:"message"`          // Message: Additional message from the API
+	Errors  string `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // MetaResponse contains metadata about the API response.
-type TagItem struct {
+type Tag struct {
 	ID          int    `json:"id"`          // ID: Unique identifier for the tag
 	GroupID     int    `json:"group_id"`    // GroupID: Identifier for the group the tag belongs to
 	GroupName   string `json:"group_name"`  // GroupName: Name of the group the tag belongs to
@@ -34,7 +34,7 @@ type TagItem struct {
 
 // GetTags retrieves a list of tags from the Chat2Desk API.
 // It uses the APIGetTags method to fetch the tags and handles errors.
-// It returns a pointer to a slice of TagItem, which contains the tags.
+// It returns a pointer to a slice of Tag, which contains the tags.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -82,7 +82,7 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
 // GetTags retrieves a list of tags from the Chat2Desk API.
 // It uses the APIGetTags method to fetch the tags and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a slice of TagItem, which contains the tags.
+// It returns a slice of Tag, which contains the tags.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
@@ -90,10 +90,10 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
 //   - limit: The maximum number of tags to retrieve.
 //
 // Returns:
-//   - A slice of TagItem, which contains the tags
+//   - A slice of Tag, which contains the tags
 //   - The total number of tags available.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]TagItem, int, error) {
+func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, error) {
 	if offset < 0 {
 		offset = 0
 	}
@@ -118,16 +118,16 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]TagItem, int
 // GetTag retrieves a specific tag by its ID from the Chat2Desk API.
 // It uses the APIGetTag method to fetch the tag and handles errors.
 // If the response status is not "success", it returns nil.
-// It returns a pointer to a TagItem, which contains the tag data.
+// It returns a pointer to a Tag, which contains the tag data.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - id: The ID of the tag to retrieve.
 //
 // Returns:
-//   - A pointer to a TagItem, which contains the tag data
+//   - A pointer to a Tag, which contains the tag data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTag(ctx context.Context, id int) (*TagItem, error) {
+func (dest *Ctd) GetTag(ctx context.Context, id int) (*Tag, error) {
 	response, err := dest.APIGetTag(ctx, id)
 	if err != nil {
 		return nil, err
@@ -146,16 +146,16 @@ func (dest *Ctd) GetTag(ctx context.Context, id int) (*TagItem, error) {
 
 // GetAllTags retrieves all tags from the Chat2Desk API.
 // It uses the GetTags method to fetch tags in a loop until all tags are retrieved.
-// It returns a slice of TagItem, which contains all the tags.
+// It returns a slice of Tag, which contains all the tags.
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //
 // Returns:
-//   - A slice of TagItem, which contains all the tags.
+//   - A slice of Tag, which contains all the tags.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetAllTags(ctx context.Context) ([]TagItem, error) {
-	var tags []TagItem
+func (dest *Ctd) GetAllTags(ctx context.Context) ([]Tag, error) {
+	var tags []Tag
 	offset := 0
 	limit := 200
 
