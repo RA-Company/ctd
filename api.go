@@ -19,6 +19,7 @@ var (
 	ErrorWebhookUrlIsAlreadyUsed = fmt.Errorf("webhook URL is already used")
 	ErrorInvalidID               = fmt.Errorf("invalid ID")
 	ErrorInvalidParameters       = fmt.Errorf("invalid parameters")
+	ErrorUnknownError            = fmt.Errorf("unknown error")
 )
 
 // MetaResponse provides metadata about the response,
@@ -245,10 +246,12 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 		return nil, ErrorInvalidToken
 	}
 
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		dst.Error(ctx, "Failed to unmarshal response (%s): %v", body, err)
-		return body, ErrorInvalidResponse
+	if response != nil {
+		err = json.Unmarshal(body, response)
+		if err != nil {
+			dst.Error(ctx, "Failed to unmarshal response (%s): %v", body, err)
+			return body, ErrorInvalidResponse
+		}
 	}
 
 	return body, nil
