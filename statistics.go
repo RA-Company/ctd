@@ -9,7 +9,7 @@ import (
 
 type StatisticsRating struct {
 	ScoreValue         json.Number `json:"score_value"`
-	RatingScaleScore   int64       `json:"rating_scale_score"`
+	RatingScaleScore   json.Number `json:"rating_scale_score"`
 	ValuationRequestID int64       `json:"valuation_request_id"`
 }
 
@@ -25,6 +25,13 @@ type StatisticsRatingResponse struct {
 // Returns:
 //   - An int64 representing the score value, or -1 if the conversion fails.
 func (dst *StatisticsRating) GetScoreValue() int64 {
+	if dst.RatingScaleScore.String() != "" {
+		result, err := dst.RatingScaleScore.Int64()
+		if err == nil {
+			return result
+		}
+	}
+
 	if result, err := dst.ScoreValue.Int64(); err != nil {
 		return -1
 	} else {
