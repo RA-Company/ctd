@@ -23,12 +23,12 @@ type MessagePayload struct {
 	Attachment         string          `json:"attachment,omitempty"`          // Attachment: optional message attachment
 	AttachmentFilename string          `json:"attachment_filename,omitempty"` // AttachmentFilename: optional attachment filename
 	Type               string          `json:"type,omitempty"`                // Type: optional message type ('to_client' (default), 'autoreply', 'system', 'comment')
-	ClientID           int             `json:"client_id,omitempty"`           // ClientID: optional client ID to send message to specific client
-	ChannelID          int             `json:"channel_id,omitempty"`          // ChannelID: optional channel ID to send message to specific channel
-	OperatorID         int             `json:"operator_id,omitempty"`         // OperatorID: optional operator ID to send message as specific operator
+	ClientID           int64           `json:"client_id,omitempty"`           // ClientID: optional client ID to send message to specific client
+	ChannelID          int64           `json:"channel_id,omitempty"`          // ChannelID: optional channel ID to send message to specific channel
+	OperatorID         int64           `json:"operator_id,omitempty"`         // OperatorID: optional operator ID to send message as specific operator
 	Transport          string          `json:"transport,omitempty"`           // Transport: optional transport to send message via specific transport
 	ExternalID         string          `json:"external_id,omitempty"`         // ExternalID: optional external ID to associate with the message
-	ReplyMessageID     int             `json:"reply_message_id,omitempty"`    // ReplyMessageID: optional ID of the message being replied to
+	ReplyMessageID     int64           `json:"reply_message_id,omitempty"`    // ReplyMessageID: optional ID of the message being replied to
 	InlineButtons      []MessageButton `json:"inline_buttons,omitempty"`      // InlineButtons: optional array of inline buttons
 	Keyboard           *MessageButtons `json:"keyboard,omitempty"`            // Keyboard: optional array of keyboard buttons
 	Interactive        string          `json:"interactive,omitempty"`         // Interactive: optional interactive parameters for the 'list' and 'button' types. Only for wa_dialog.
@@ -42,14 +42,14 @@ type SendMessageResponse struct {
 }
 
 type SendMessage struct {
-	MessageID  int    `json:"message_id"`  // MessageID: Unique message ID
-	ChannelID  int    `json:"channel_id"`  // ChannelID: Channel ID
-	OperatorID int    `json:"operator_id"` // OperatorID: Operator ID
+	MessageID  int64  `json:"message_id"`  // MessageID: Unique message ID
+	ChannelID  int64  `json:"channel_id"`  // ChannelID: Channel ID
+	OperatorID int64  `json:"operator_id"` // OperatorID: Operator ID
 	Transport  string `json:"transport"`   // Transport: Transport
 	Type       string `json:"type"`        // Type: Message type ('to_client', 'autoreply', 'system', 'comment')
-	ClientID   int    `json:"client_id"`   // ClientID: Client ID
-	DialogID   int    `json:"dialog_id"`   // DialogID: Dialog ID
-	RequestID  int    `json:"request_id"`  // RequestID: Request ID
+	ClientID   int64  `json:"client_id"`   // ClientID: Client ID
+	DialogID   int64  `json:"dialog_id"`   // DialogID: Dialog ID
+	RequestID  int64  `json:"request_id"`  // RequestID: Request ID
 }
 
 type MessageAttachment struct {
@@ -58,11 +58,11 @@ type MessageAttachment struct {
 }
 
 type Message struct {
-	ID              int                 `json:"id"`               // ID: Unique message ID
+	ID              int64               `json:"id"`               // ID: Unique message ID
 	Coordinates     string              `json:"coordinates"`      // Coordinates: Message coordinates (if any)
 	Transport       string              `json:"transport"`        // Transport: Transport
 	Type            string              `json:"type"`             // Type: Message type ('to_client', 'autoreply', 'system', 'comment')
-	Read            int                 `json:"read"`             // Read: Read status (0 or 1)
+	Read            int8                `json:"read"`             // Read: Read status (0 or 1)
 	Created         string              `json:"created"`          // Created: Creation timestamp
 	Pdf             string              `json:"pdf"`              // Pdf: PDF attachment (if any)
 	RemoteID        string              `json:"remote_id"`        // RemoteID: Remote ID (if any)
@@ -72,11 +72,11 @@ type Message struct {
 	Photo           string              `json:"photo"`            // Photo: Photo attachment (if any)
 	Video           string              `json:"video"`            // Video attachment (if any)
 	Audio           string              `json:"audio"`            // Audio attachment (if any)
-	OperatorID      int                 `json:"operator_id"`      // OperatorID: Operator ID
-	ChannelID       int                 `json:"channel_id"`       // ChannelID: Channel ID
-	DialogID        int                 `json:"dialog_id"`        // DialogID: Dialog ID
-	ClientID        int                 `json:"client_id"`        // ClientID: Client ID
-	RequestID       int                 `json:"request_id"`       // RequestID: Request ID
+	OperatorID      int64               `json:"operator_id"`      // OperatorID: Operator ID
+	ChannelID       int64               `json:"channel_id"`       // ChannelID: Channel ID
+	DialogID        int64               `json:"dialog_id"`        // DialogID: Dialog ID
+	ClientID        int64               `json:"client_id"`        // ClientID: Client ID
+	RequestID       int64               `json:"request_id"`       // RequestID: Request ID
 	ExtraData       any                 `json:"extra_data"`       // ExtraData: Extra data (if any)
 	Status          string              `json:"status"`           // Status: Message status ('sent', 'failed', etc.)
 }

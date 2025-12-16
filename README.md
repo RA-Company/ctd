@@ -478,6 +478,25 @@ Returns:
   - An error if the request fails.
 </details>
 
+```func (*Ctd).APICloseDialog(ctx context.Context, dialog_id int64, opertor_id int64, initiator_id int64) (*BasicResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APICloseDialog closes a dialog by its ID.
+It takes a context, dialog ID, operator ID, and initiator ID, and returns a BasicResponse or an error.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - dialog_id (int64): The ID of the dialog to close.
+  - opertor_id (int64): The ID of the operator closing the dialog.
+  - initiator_id (int64): The ID of the initiator (optional).
+
+Returns:
+  - A pointer to a BasicResponse containing the response data.
+  - An error if the request fails.
+</details>
+
 ```func (*Ctd).GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dialog, int, error)```
 
 <details>
@@ -510,6 +529,24 @@ Parameters:
 
 Returns:
   - A pointer to a Dialog containing the dialog data.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).CloseDialog(ctx context.Context, dialog_id int64, opertor_id int64, initiator_id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+CloseDialog closes a dialog by its ID.
+It takes a context, dialog ID, operator ID, and initiator ID, and returns an error if the operation fails.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - dialog_id (int64): The ID of the dialog to close.
+  - opertor_id (int64): The ID of the operator closing the dialog.
+  - initiator_id (int64): The ID of the initiator (optional).
+
+Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 

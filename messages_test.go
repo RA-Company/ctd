@@ -15,11 +15,11 @@ func TestCtd_Messages(t *testing.T) {
 
 	url, token := getCredentials(t)
 
-	clientID := env.GetEnvInt("API_CLIENT_ID", 0)
+	clientID := int64(env.GetEnvInt("API_CLIENT_ID", 0))
 	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file and .settings")
 	transport := env.GetEnvStr("API_MESSAGE_TRANSPORT", "")
 	require.NotEmpty(t, transport, "API_MESSAGE_TRANSPORT must be set in .env file and .settings")
-	channelID := env.GetEnvInt("API_CHANNEL_ID", 0)
+	channelID := int64(env.GetEnvInt("API_CHANNEL_ID", 0))
 	require.NotEqual(t, 0, channelID, "API_CHANNEL_ID must be set in .env file and .settings")
 	messageURL := env.GetEnvStr("API_MESSAGE_URL", "")
 	require.NotEmpty(t, messageURL, "API_MESSAGE_URL must be set in .env file and .settings")

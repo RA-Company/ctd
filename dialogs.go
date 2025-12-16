@@ -110,6 +110,36 @@ func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogRespo
 	return &response, nil
 }
 
+// APICloseDialog closes a dialog by its ID.
+// It takes a context, dialog ID, operator ID, and initiator ID, and returns a BasicResponse or an error.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - dialog_id (int64): The ID of the dialog to close.
+//   - opertor_id (int64): The ID of the operator closing the dialog.
+//   - initiator_id (int64): The ID of the initiator (optional).
+//
+// Returns:
+//   - A pointer to a BasicResponse containing the response data.
+//   - An error if the request fails.
+func (dst *Ctd) APICloseDialog(ctx context.Context, dialog_id, opertor_id, initiator_id int64) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/dialogs/%d", dst.Url, dialog_id)
+	payload := map[string]interface{}{
+		"operator_id": opertor_id,
+		"state":       "closed",
+	}
+	if initiator_id > 0 {
+		payload["initiator_id"] = initiator_id
+	}
+	response := BasicResponse{}
+
+	if _, err := dst.doRequest(ctx, "PUT", url, payload, &response); err != nil {
+		dst.Error(ctx, "Failed close dialog by ID: %v", err)
+		return nil, err
+	}
+	return &response, nil
+}
+
 // GetDialogs retrieves a list of dialogs.
 // It takes a context and GetDialogsParams, and returns a slice of Dialog or an error.
 //
@@ -160,4 +190,32 @@ func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error)
 	}
 
 	return &data.Data, nil
+}
+
+// CloseDialog closes a dialog by its ID.
+// It takes a context, dialog ID, operator ID, and initiator ID, and returns an error if the operation fails.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - dialog_id (int64): The ID of the dialog to close.
+//   - opertor_id (int64): The ID of the operator closing the dialog.
+//   - initiator_id (int64): The ID of the initiator (optional).
+//
+// Returns:
+//   - An error if the request fails or if the response is invalid.
+func (dst *Ctd) CloseDialog(ctx context.Context, dialog_id, opertor_id, initiator_id int64) error {
+	data, err := dst.APICloseDialog(ctx, dialog_id, opertor_id, initiator_id)
+	if err != nil {
+		return err
+	}
+
+	if data.Status != "success" {
+		dst.Error(ctx, "Failed to close dialog by ID: %s", data.Errors)
+		if strings.Contains(fmt.Sprintf("%v", data.Errors), "has already state") {
+			return ErrorDialogClosed
+		}
+		return ErrorInvalidParameters
+	}
+
+	return nil
 }
