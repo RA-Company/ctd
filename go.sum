@@ -1,5 +1,7 @@
 github.com/brianvoe/gofakeit/v7 v7.7.3 h1:RWOATEGpJ5EVg2nN8nlaEyaV/aB4d6c3GqYrbqQekss=
 github.com/brianvoe/gofakeit/v7 v7.7.3/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
+github.com/brianvoe/gofakeit/v7 v7.12.1 h1:df1tiI4SL1dR5Ix4D/r6a3a+nXBJ/OBGU5jEKRBmmqg=
+github.com/brianvoe/gofakeit/v7 v7.12.1/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
@@ -8,6 +10,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/ra-company/env v1.0.1 h1:wDV9NtgvJzDx9/0jbB/+EWvKbE0ZVjAemuWxrDHw9qw=
 github.com/ra-company/env v1.0.1/go.mod h1:Wnr6DHulEi5q4F3h0AVC1R249vVV5B26kSs7190/jTI=
+github.com/ra-company/env v1.0.2 h1:T/Den1sm1J5wmDgvV9qwhQBuXeJpmNhbCTfeGdpxYKo=
+github.com/ra-company/env v1.0.2/go.mod h1:+Vs7ReweATBX+kV+6MpJJqdnbaIEmU+RYiY1/rQPLZo=
 github.com/ra-company/jsons v1.0.0 h1:7fxiEQ+WugyoE5KvwGWDqnl17m+hG1F3xV8GvEwPfm8=
 github.com/ra-company/jsons v1.0.0/go.mod h1:L9bWyVspLq7/yck6xENq8sVzXVTmirQkzsHM5pvgzQc=
 github.com/ra-company/logging v1.0.7 h1:EMacMoF/cO7so5FI+qqfwrhQ6V2p9o8aGaYcfCrzZHw=

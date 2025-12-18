@@ -68,7 +68,7 @@ func (dest *Ctd) APIGetTags(ctx context.Context, offset, limit int) (*TagsRespon
 // Returns:
 //   - A pointer to a TagResponse struct containing the tag data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
+func (dest *Ctd) APIGetTag(ctx context.Context, id int64) (*TagResponse, error) {
 	url := fmt.Sprintf("%sv1/tags/%d", dest.Url, id)
 	response := TagResponse{}
 	_, err := dest.doRequest(ctx, "GET", url, nil, &response)
@@ -76,6 +76,98 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int) (*TagResponse, error) {
 		dest.Error(ctx, "Failed to get tag: %v", err)
 		return nil, err
 	}
+	return &response, nil
+}
+
+// APIAssignTag assigns tags to a client or request in the Chat2Desk API.
+// It constructs the API endpoint URL, prepares the payload with tag IDs, mode, and assignee ID,
+// sends a POST request to the API, and returns the response data as a BasicResponse struct.
+// If an error occurs during the request, it logs the error and returns it.
+// If the request is successful, it returns a pointer to the BasicResponse struct.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_ids: A slice of tag IDs to be assigned.
+//   - mode: The mode of assignment ('client' or 'request').
+//   - id: The ID of the client or request to which the tags will be assigned.
+//
+// Returns:
+//   - A pointer to a BasicResponse struct containing the response data
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) APIAssignTag(ctx context.Context, tag_ids []int64, mode string, id int64) (*BasicResponse, error) {
+	if len(tag_ids) == 0 {
+		return nil, ErrorInvalidParameters
+	}
+
+	url := fmt.Sprintf("%sv1/tags/assign_to", dest.Url)
+	if mode != "client" {
+		mode = "request"
+	}
+	payload := map[string]any{
+		"tag_ids":       tag_ids,
+		"assignee_type": mode,
+		"assignee_id":   id,
+	}
+	response := BasicResponse{}
+	data, err := dest.doRequest(ctx, "POST", url, payload, &response)
+	if err != nil {
+		dest.Error(ctx, "Failed to assign tag: %v", err)
+		return nil, err
+	}
+
+	if strings.Contains(string(data), "request does not belong") {
+		return nil, ErrorInvalidRequestID
+	}
+
+	if strings.Contains(string(data), "client does not belong") {
+		return nil, ErrorInvalidClientID
+	}
+
+	return &response, nil
+}
+
+// APIRemoveTagFrom removes a tag from a client or request in the Chat2Desk API.
+// It constructs the API endpoint URL, prepares the payload with mode and assignee ID,
+// sends a POST request to the API, and returns the response data as a BasicResponse struct.
+// If an error occurs during the request, it logs the error and returns it.
+// If the request is successful, it returns a pointer to the BasicResponse struct.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_id: The ID of the tag to be removed.
+//   - mode: The mode of removal ('client' or 'request').
+//   - id: The ID of the client or request from which the tag will be removed.
+//
+// Returns:
+//   - A pointer to a BasicResponse struct containing the response data
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string, id int64) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/tags/%d/delete_from", dest.Url, tag_id)
+	payload := map[string]int64{}
+	if mode == "client" {
+		payload["client_id"] = id
+	} else {
+		payload["request_id"] = id
+	}
+	response := BasicResponse{}
+	data, err := dest.doRequest(ctx, "DELETE", url, payload, &response)
+	if err != nil {
+		dest.Error(ctx, "Failed to remove tag: %v", err)
+		return nil, err
+	}
+
+	if strings.Contains(string(data), "tag does not exist") {
+		return nil, ErrorInvalidTagID
+	}
+
+	if strings.Contains(string(data), "request not found") {
+		return nil, ErrorInvalidRequestID
+	}
+
+	if strings.Contains(string(data), "client not found") {
+		return nil, ErrorInvalidClientID
+	}
+
 	return &response, nil
 }
 
@@ -127,7 +219,7 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, er
 // Returns:
 //   - A pointer to a Tag, which contains the tag data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTag(ctx context.Context, id int) (*Tag, error) {
+func (dest *Ctd) GetTag(ctx context.Context, id int64) (*Tag, error) {
 	response, err := dest.APIGetTag(ctx, id)
 	if err != nil {
 		return nil, err
@@ -177,4 +269,104 @@ func (dest *Ctd) GetAllTags(ctx context.Context) ([]Tag, error) {
 	}
 
 	return tags, nil
+}
+
+// AddTagToRequest assigns tags to a specific request in the Chat2Desk API.
+// It uses the APIAssignTag method to assign the tags and handles errors.
+// If the response status is not "success", it returns an error.
+// It returns nil if the tags are successfully assigned.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_ids: A slice of tag IDs to be assigned.
+//   - id: The ID of the request to which the tags will be assigned.
+//
+// Returns:
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) AddTagToRequest(ctx context.Context, tag_ids []int64, id int64) error {
+	response, err := dest.APIAssignTag(ctx, tag_ids, "request", id)
+	if err != nil {
+		return err
+	}
+
+	if response.Status != "success" {
+		return ErrorInvalidResponse
+	}
+
+	return nil
+}
+
+// AddTagToClient assigns tags to a specific client in the Chat2Desk API.
+// It uses the APIAssignTag method to assign the tags and handles errors.
+// If the response status is not "success", it returns an error.
+// It returns nil if the tags are successfully assigned.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_ids: A slice of tag IDs to be assigned.
+//   - id: The ID of the client to which the tags will be assigned.
+//
+// Returns:
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) AddTagToClient(ctx context.Context, tag_ids []int64, id int64) error {
+	response, err := dest.APIAssignTag(ctx, tag_ids, "client", id)
+	if err != nil {
+		return err
+	}
+
+	if response.Status != "success" {
+		return ErrorInvalidResponse
+	}
+
+	return nil
+}
+
+// RemoveTagFromRequest removes a tag from a specific request in the Chat2Desk API.
+// It uses the APIRemoveTagFrom method to remove the tag and handles errors.
+// If the response status is not "success", it returns an error.
+// It returns nil if the tag is successfully removed.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_id: The ID of the tag to be removed.
+//   - id: The ID of the request from which the tag will be removed.
+//
+// Returns:
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) RemoveTagFromRequest(ctx context.Context, tag_id int64, id int64) error {
+	response, err := dest.APIRemoveTagFrom(ctx, tag_id, "request", id)
+	if err != nil {
+		return err
+	}
+
+	if response.Status != "success" {
+		return ErrorInvalidResponse
+	}
+
+	return nil
+}
+
+// RemoveTagFromClient removes a tag from a specific client in the Chat2Desk API.
+// It uses the APIRemoveTagFrom method to remove the tag and handles errors.
+// If the response status is not "success", it returns an error.
+// It returns nil if the tag is successfully removed.
+//
+// Parameters:
+//   - ctx: The context for the request, allowing for cancellation and timeouts.
+//   - tag_id: The ID of the tag to be removed.
+//   - id: The ID of the client from which the tag will be removed.
+//
+// Returns:
+//   - An error if the request fails or if the response is invalid.
+func (dest *Ctd) RemoveTagFromClient(ctx context.Context, tag_id int64, id int64) error {
+	response, err := dest.APIRemoveTagFrom(ctx, tag_id, "client", id)
+	if err != nil {
+		return err
+	}
+
+	if response.Status != "success" {
+		return ErrorInvalidResponse
+	}
+
+	return nil
 }

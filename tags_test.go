@@ -13,13 +13,13 @@ func TestCtd_Tags(t *testing.T) {
 
 	url, token := getCredentials(t)
 
-	tagID := env.GetEnvInt("API_TAG_ID", 0)
+	tagID := int64(env.GetEnvInt("API_TAG_ID", 0))
 	require.NotEqual(t, 0, tagID, "API_TAG_ID must be set in .env file or .settings")
 
 	tests := []struct {
 		name   string
 		token  string
-		tsg_id int
+		tsg_id int64
 		isData bool
 		error  error
 	}{
@@ -64,7 +64,7 @@ func TestCtd_Tags(t *testing.T) {
 		})
 	}
 
-	t.Run("GetTagsList", func(t *testing.T) {
+	t.Run("01 GetTagsList", func(t *testing.T) {
 		dst := &Ctd{}
 		dst.Init(url, token)
 
@@ -106,6 +106,160 @@ func TestCtd_Tags(t *testing.T) {
 			require.NoError(t, err, "dst.GetAllTags() should not return an error")
 			require.NotNil(t, allTags, "dst.GetAllTags() should return data")
 			require.Greater(t, len(allTags), 0, "dst.GetAllTags() should return non-empty tag list")
+		})
+	})
+
+	requestID := env.GetEnvInt("API_REQUEST_ID", 0)
+	require.NotEqual(t, 0, requestID, "API_REQUEST_ID must be set in .env file or .settings")
+
+	t.Run("02 Assign tags to request", func(t *testing.T) {
+		dst := &Ctd{}
+		t.Run("Invalid token", func(t *testing.T) {
+			dst.Init(url, "invalid token")
+			err := dst.AddTagToRequest(ctx, []int64{tagID}, int64(requestID))
+			require.ErrorIs(t, err, ErrorInvalidToken, "dst.AddTagToRequest() should return an error for invalid token")
+		})
+
+		t.Run("Valid token", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToRequest(ctx, []int64{tagID}, int64(requestID))
+			require.NoError(t, err, "dst.AddTagToRequest() should not return an error for valid token and data")
+		})
+
+		t.Run("Set same tags", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToRequest(ctx, []int64{tagID}, int64(requestID))
+			require.NoError(t, err, "dst.AddTagToRequest() should not return an error when setting the same tags again")
+		})
+
+		t.Run("Empty tag ids", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToRequest(ctx, []int64{}, int64(requestID))
+			require.ErrorIs(t, err, ErrorInvalidParameters, "dst.AddTagToRequest() should return an error for empty tag IDs")
+		})
+
+		t.Run("Invalid tag IDs", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToRequest(ctx, []int64{0, -1}, int64(requestID))
+			require.NoError(t, err, "dst.AddTagToRequest() should not return an error for valid invalid tag ids")
+		})
+
+		t.Run("Invalid request ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToRequest(ctx, []int64{tagID}, 0)
+			require.ErrorIs(t, err, ErrorInvalidRequestID, "dst.AddTagToRequest() should return an error for invalid request ID")
+		})
+	})
+
+	t.Run("03 Remove tag from request", func(t *testing.T) {
+		dst := &Ctd{}
+
+		t.Run("01 Invalid token", func(t *testing.T) {
+			dst.Init(url, "invalid token")
+			err := dst.RemoveTagFromRequest(ctx, tagID, int64(requestID))
+			require.ErrorIs(t, err, ErrorInvalidToken, "dst.RemoveTagFromRequest() should return an error for invalid token")
+		})
+
+		t.Run("02 Valid token", func(t *testing.T) {
+			dst.Init(url, token)
+			dst.AddTagToRequest(ctx, []int64{tagID}, int64(requestID))
+			err := dst.RemoveTagFromRequest(ctx, tagID, int64(requestID))
+			require.NoError(t, err, "dst.RemoveTagFromRequest() should not return an error for valid token and data")
+		})
+
+		t.Run("03 Remove same tag again", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromRequest(ctx, tagID, int64(requestID))
+			require.ErrorIs(t, err, ErrorInvalidRequestID, "dst.RemoveTagFromRequest() should return an error when removing a tag that is not assigned")
+		})
+
+		t.Run("04 Invalid tag ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromRequest(ctx, 0, int64(requestID))
+			require.ErrorIs(t, err, ErrorInvalidTagID, "dst.RemoveTagFromRequest() should return an error for invalid tag ID")
+		})
+
+		t.Run("05 Invalid request ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromRequest(ctx, tagID, 0)
+			require.ErrorIs(t, err, ErrorInvalidRequestID, "dst.RemoveTagFromRequest() should return an error for invalid request ID")
+		})
+	})
+
+	clientID := env.GetEnvInt("API_CLIENT_ID", 0)
+	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file or .settings")
+
+	t.Run("04 Assign tags to client", func(t *testing.T) {
+		dst := &Ctd{}
+		t.Run("Invalid token", func(t *testing.T) {
+			dst.Init(url, "invalid token")
+			err := dst.AddTagToClient(ctx, []int64{tagID}, int64(clientID))
+			require.ErrorIs(t, err, ErrorInvalidToken, "dst.AddTagToClient() should return an error for invalid token")
+		})
+
+		t.Run("Valid token", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToClient(ctx, []int64{tagID}, int64(clientID))
+			require.NoError(t, err, "dst.AddTagToClient() should not return an error for valid token and data")
+		})
+
+		t.Run("Set same tags", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToClient(ctx, []int64{tagID}, int64(clientID))
+			require.NoError(t, err, "dst.AddTagToClient() should not return an error when setting the same tags again")
+		})
+
+		t.Run("Empty tag ids", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToClient(ctx, []int64{}, int64(clientID))
+			require.ErrorIs(t, err, ErrorInvalidParameters, "dst.AddTagToClient() should return an error for empty tag IDs")
+		})
+
+		t.Run("Invalid tag IDs", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToClient(ctx, []int64{0, -1}, int64(clientID))
+			require.NoError(t, err, "dst.AddTagToClient() should not return an error for valid invalid tag ids")
+		})
+
+		t.Run("Invalid client ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.AddTagToClient(ctx, []int64{tagID}, 0)
+			require.ErrorIs(t, err, ErrorInvalidClientID, "dst.AddTagToClient() should return an error for invalid client ID")
+		})
+	})
+
+	t.Run("05 Remove tag from client", func(t *testing.T) {
+		dst := &Ctd{}
+
+		t.Run("01 Invalid token", func(t *testing.T) {
+			dst.Init(url, "invalid token")
+			err := dst.RemoveTagFromClient(ctx, tagID, int64(clientID))
+			require.ErrorIs(t, err, ErrorInvalidToken, "dst.RemoveTagFromClient() should return an error for invalid token")
+		})
+
+		t.Run("02 Valid token", func(t *testing.T) {
+			dst.Init(url, token)
+			dst.AddTagToClient(ctx, []int64{tagID}, int64(clientID))
+			err := dst.RemoveTagFromClient(ctx, tagID, int64(clientID))
+			require.NoError(t, err, "dst.RemoveTagFromClient() should not return an error for valid token and data")
+		})
+
+		t.Run("03 Remove same tag again", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromClient(ctx, tagID, int64(clientID))
+			require.ErrorIs(t, err, ErrorInvalidClientID, "dst.RemoveTagFromClient() should return an error when removing a tag that is not assigned")
+		})
+
+		t.Run("04 Invalid tag ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromClient(ctx, 0, int64(clientID))
+			require.ErrorIs(t, err, ErrorInvalidTagID, "dst.RemoveTagFromClient() should return an error for invalid tag ID")
+		})
+
+		t.Run("05 Invalid client ID", func(t *testing.T) {
+			dst.Init(url, token)
+			err := dst.RemoveTagFromClient(ctx, tagID, 0)
+			require.ErrorIs(t, err, ErrorInvalidClientID, "dst.RemoveTagFromClient() should return an error for invalid client ID")
 		})
 	})
 }

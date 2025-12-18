@@ -21,6 +21,9 @@ var (
 	ErrorInvalidParameters       = fmt.Errorf("invalid parameters")
 	ErrorUnknownError            = fmt.Errorf("unknown error")
 	ErrorDialogClosed            = fmt.Errorf("dialog is closed")
+	ErrorInvalidRequestID        = fmt.Errorf("invalid request ID")
+	ErrorInvalidClientID         = fmt.Errorf("invalid client ID")
+	ErrorInvalidTagID            = fmt.Errorf("invalid tag ID")
 )
 
 // MetaResponse provides metadata about the response,

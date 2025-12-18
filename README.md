@@ -847,7 +847,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).APIGetTag(ctx context.Context, id int) (*TagResponse, error)```
+```func (*Ctd).APIGetTag(ctx context.Context, id int64) (*TagResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -863,6 +863,50 @@ Parameters:
 
 Returns:
   - A pointer to a TagResponse struct containing the tag data
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).APIAssignTag(ctx context.Context, tag_ids []int64, mode string, id int64) (*BasicResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIAssignTag assigns tags to a client or request in the Chat2Desk API.
+It constructs the API endpoint URL, prepares the payload with tag IDs, mode, and assignee ID,
+sends a POST request to the API, and returns the response data as a BasicResponse struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the BasicResponse struct.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_ids: A slice of tag IDs to be assigned.
+  - mode: The mode of assignment ('client' or 'request').
+  - id: The ID of the client or request to which the tags will be assigned.
+
+Returns:
+  - A pointer to a BasicResponse struct containing the response data
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string, id int64) (*BasicResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APIRemoveTagFrom removes a tag from a client or request in the Chat2Desk API.
+It constructs the API endpoint URL, prepares the payload with mode and assignee ID,
+sends a POST request to the API, and returns the response data as a BasicResponse struct.
+If an error occurs during the request, it logs the error and returns it.
+If the request is successful, it returns a pointer to the BasicResponse struct.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_id: The ID of the tag to be removed.
+  - mode: The mode of removal ('client' or 'request').
+  - id: The ID of the client or request from which the tag will be removed.
+
+Returns:
+  - A pointer to a BasicResponse struct containing the response data
   - An error if the request fails or if the response is invalid.
 </details>
 
@@ -887,7 +931,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetTag(ctx context.Context, id int) (*Tag, error)```
+```func (*Ctd).GetTag(ctx context.Context, id int64) (*Tag, error)```
 
 <details>
 <summary>Function description</summary>
@@ -920,6 +964,82 @@ Parameters:
 
 Returns:
   - A slice of Tag, which contains all the tags.
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).AddTagToRequest(ctx context.Context, tag_ids []int64, id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+AddTagToRequest assigns tags to a specific request in the Chat2Desk API.
+It uses the APIAssignTag method to assign the tags and handles errors.
+If the response status is not "success", it returns an error.
+It returns nil if the tags are successfully assigned.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_ids: A slice of tag IDs to be assigned.
+  - id: The ID of the request to which the tags will be assigned.
+
+Returns:
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).AddTagToClient(ctx context.Context, tag_ids []int64, id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+AddTagToClient assigns tags to a specific client in the Chat2Desk API.
+It uses the APIAssignTag method to assign the tags and handles errors.
+If the response status is not "success", it returns an error.
+It returns nil if the tags are successfully assigned.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_ids: A slice of tag IDs to be assigned.
+  - id: The ID of the client to which the tags will be assigned.
+
+Returns:
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).RemoveTagFromRequest(ctx context.Context, tag_id int64, id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+RemoveTagFromRequest removes a tag from a specific request in the Chat2Desk API.
+It uses the APIRemoveTagFrom method to remove the tag and handles errors.
+If the response status is not "success", it returns an error.
+It returns nil if the tag is successfully removed.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_id: The ID of the tag to be removed.
+  - id: The ID of the request from which the tag will be removed.
+
+Returns:
+  - An error if the request fails or if the response is invalid.
+</details>
+
+```func (*Ctd).RemoveTagFromClient(ctx context.Context, tag_id int64, id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+RemoveTagFromClient removes a tag from a specific client in the Chat2Desk API.
+It uses the APIRemoveTagFrom method to remove the tag and handles errors.
+If the response status is not "success", it returns an error.
+It returns nil if the tag is successfully removed.
+
+Parameters:
+  - ctx: The context for the request, allowing for cancellation and timeouts.
+  - tag_id: The ID of the tag to be removed.
+  - id: The ID of the client from which the tag will be removed.
+
+Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
