@@ -107,6 +107,73 @@ func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*S
 	return &response, nil
 }
 
+// APITransferToGroup transfers a message to a different group via the API.
+// It takes a context, message ID, group ID, and force flag, and returns an error if the request fails.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - message_id (int64): The ID of the message to transfer.
+//   - group_id (int64): The ID of the group to transfer the message to.
+//   - force (bool): Whether to force the transfer.
+//
+// Returns:
+//   - A pointer to a BasicResponse containing the response data.
+//   - An error if the request fails.
+func (dst *Ctd) APITransferToGroup(ctx context.Context, message_id, group_id int64, force bool) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/messages/%d/transfer_to_group?group_id=%d&force=%t", dst.Url, message_id, group_id, force)
+	response := BasicResponse{}
+
+	data, err := dst.doRequest(ctx, "GET", url, nil, &response)
+	if err != nil {
+		dst.Error(ctx, "Failed transfer message to group: %v", err)
+		return nil, err
+	}
+
+	str := strings.ToLower(string(data))
+	if strings.Contains(str, "operator group") && strings.Contains(str, "not found") {
+		return nil, ErrorInvalidOperatorGroupID
+	}
+
+	if strings.Contains(str, "message") && strings.Contains(str, "not found") {
+		return nil, ErrorInvalidMesssageID
+	}
+
+	return &response, nil
+}
+
+// APITransferToOperator transfers a message to a different operator via the API.
+// It takes a context, message ID, and operator ID, and returns an error if the request fails.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - message_id (int64): The ID of the message to transfer.
+//   - operator_id (int64): The ID of the operator to transfer the message to.
+//
+// Returns:
+//   - A pointer to a BasicResponse containing the response data.
+//   - An error if the request fails.
+func (dst *Ctd) APITransferToOperator(ctx context.Context, message_id, operator_id int64) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/messages/%d/transfer?operator_id=%d", dst.Url, message_id, operator_id)
+	response := BasicResponse{}
+
+	data, err := dst.doRequest(ctx, "GET", url, nil, &response)
+	if err != nil {
+		dst.Error(ctx, "Failed transfer message to operator: %v", err)
+		return nil, err
+	}
+
+	str := strings.ToLower(string(data))
+	if strings.Contains(str, "operator") && strings.Contains(str, "not found") {
+		return nil, ErrorInvalidOperatorID
+	}
+
+	if strings.Contains(str, "message") && strings.Contains(str, "not found") {
+		return nil, ErrorInvalidMesssageID
+	}
+
+	return &response, nil
+}
+
 // SendMessage sends a message to the API.
 // It takes a context and a MessagePayload, and returns a Message or an error.
 //
@@ -129,4 +196,53 @@ func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*Send
 	}
 
 	return &data.Data, nil
+}
+
+// TransferToGroup transfers a message to a different group.
+// It takes a context, message ID, group ID, and force flag, and returns an error if the request fails.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - message_id (int64): The ID of the message to transfer.
+//   - group_id (int64): The ID of the group to transfer the message to.
+//   - force (bool): Whether to force the transfer.
+//
+// Returns:
+//   - An error if the request fails.
+func (dst *Ctd) TransferToGroup(ctx context.Context, message_id, group_id int64, force bool) error {
+	data, err := dst.APITransferToGroup(ctx, message_id, group_id, force)
+	if err != nil {
+		return err
+	}
+
+	if data.Status != "success" {
+		dst.Error(ctx, "Failed to transfer message to group: %s", data.Errors)
+		return ErrorInvalidParameters
+	}
+
+	return nil
+}
+
+// TransferToOperator transfers a message to a different operator.
+// It takes a context, message ID, and operator ID, and returns an error if the request fails.
+//
+// Parameters:
+//   - ctx (context.Context): The context for the request.
+//   - message_id (int64): The ID of the message to transfer.
+//   - operator_id (int64): The ID of the operator to transfer the message to.
+//
+// Returns:
+//   - An error if the request fails.
+func (dst *Ctd) TransferToOperator(ctx context.Context, message_id, operator_id int64) error {
+	data, err := dst.APITransferToOperator(ctx, message_id, operator_id)
+	if err != nil {
+		return err
+	}
+
+	if data.Status != "success" {
+		dst.Error(ctx, "Failed to transfer message to operator: %s", data.Errors)
+		return ErrorInvalidParameters
+	}
+
+	return nil
 }

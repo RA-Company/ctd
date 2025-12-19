@@ -24,6 +24,9 @@ var (
 	ErrorInvalidRequestID        = fmt.Errorf("invalid request ID")
 	ErrorInvalidClientID         = fmt.Errorf("invalid client ID")
 	ErrorInvalidTagID            = fmt.Errorf("invalid tag ID")
+	ErrorInvalidOperatorGroupID  = fmt.Errorf("invalid operator group ID")
+	ErrorInvalidOperatorID       = fmt.Errorf("invalid operator ID")
+	ErrorInvalidMesssageID       = fmt.Errorf("invalid message ID")
 )
 
 // MetaResponse provides metadata about the response,

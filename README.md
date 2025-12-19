@@ -574,6 +574,43 @@ Returns:
   - An error if the request fails.
 </details>
 
+```func (*Ctd).APITransferToGroup(ctx context.Context, message_id int64, group_id int64, force bool) (*BasicResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APITransferToGroup transfers a message to a different group via the API.
+It takes a context, message ID, group ID, and force flag, and returns an error if the request fails.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message_id (int64): The ID of the message to transfer.
+  - group_id (int64): The ID of the group to transfer the message to.
+  - force (bool): Whether to force the transfer.
+
+Returns:
+  - A pointer to a BasicResponse containing the response data.
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).APITransferToOperator(ctx context.Context, message_id int64, operator_id int64) (*BasicResponse, error)```
+
+<details>
+<summary>Function description</summary>
+
+APITransferToOperator transfers a message to a different operator via the API.
+It takes a context, message ID, and operator ID, and returns an error if the request fails.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message_id (int64): The ID of the message to transfer.
+  - operator_id (int64): The ID of the operator to transfer the message to.
+
+Returns:
+  - A pointer to a BasicResponse containing the response data.
+  - An error if the request fails.
+</details>
+
 ```func (*Ctd).SendMessage(ctx context.Context, message *MessagePayload) (*SendMessage, error)```
 
 <details>
@@ -588,6 +625,41 @@ Parameters:
 
 Returns:
   - A pointer to a Message containing the response data.
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).TransferToGroup(ctx context.Context, message_id int64, group_id int64, force bool) error```
+
+<details>
+<summary>Function description</summary>
+
+TransferToGroup transfers a message to a different group.
+It takes a context, message ID, group ID, and force flag, and returns an error if the request fails.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message_id (int64): The ID of the message to transfer.
+  - group_id (int64): The ID of the group to transfer the message to.
+  - force (bool): Whether to force the transfer.
+
+Returns:
+  - An error if the request fails.
+</details>
+
+```func (*Ctd).TransferToOperator(ctx context.Context, message_id int64, operator_id int64) error```
+
+<details>
+<summary>Function description</summary>
+
+TransferToOperator transfers a message to a different operator.
+It takes a context, message ID, and operator ID, and returns an error if the request fails.
+
+Parameters:
+  - ctx (context.Context): The context for the request.
+  - message_id (int64): The ID of the message to transfer.
+  - operator_id (int64): The ID of the operator to transfer the message to.
+
+Returns:
   - An error if the request fails.
 </details>
 
