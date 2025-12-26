@@ -2,16 +2,19 @@ package ctd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/ra-company/logging"
 )
 
 // ClientResponse represents the response structure for client-related API calls.
 type ClientResponse struct {
-	Data    Client `json:"data"` // Data: List of clients
-	Message string `json:"message"`
-	Errors  any    `json:"errors,omitempty"` // Errors: List of errors,
-	Status  string `json:"status"`
+	Data    Client          `json:"data"` // Data: List of clients
+	Message string          `json:"message"`
+	Errors  json.RawMessage `json:"errors,omitempty"` // Errors: List of errors,
+	Status  string          `json:"status"`
 }
 
 type ClientsResponse struct {
@@ -237,9 +240,58 @@ func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, chann
 		return nil, err
 	}
 
-	if response.Status != "success" {
-		dst.lastError = response.Errors
-		return nil, ErrorInvalidResponse
+	if response.Status == "success" {
+		return &response.Data, nil
 	}
-	return &response.Data, nil
+
+	str := strings.ToLower(fmt.Sprintf("%s", response.Errors))
+	if strings.Contains(str, "client already exist") {
+		id, err := dst.createClientExists(ctx, response.Errors)
+		if err == nil {
+			client := Client{
+				ID:           int(id),
+				Phone:        phone,
+				ClientPhone:  assigned_phone,
+				AssignedName: nickname,
+				Channels: []Channel{
+					{
+						ID:         channel_id,
+						Transports: []string{transport},
+					},
+				},
+			}
+			return &client, ErrorClieantAlreadyExists
+		}
+	}
+
+	logging.Logs.Errorf(ctx, "Failed to create client: %s", response.Errors)
+	if strings.Contains(str, "transport") {
+		if strings.Contains(str, "incorrect") {
+			return nil, ErrorInvalidTransport
+		}
+	}
+
+	if strings.Contains(str, "not found") {
+		if strings.Contains(str, "channel") {
+			return nil, ErrorInvalidChannelID
+		}
+	}
+
+	return nil, ErrorInvalidResponse
+}
+
+func (dst *Ctd) createClientExists(ctx context.Context, result json.RawMessage) (int64, error) {
+	var outer map[string][]string
+	if err := json.Unmarshal(result, &outer); err != nil {
+		return 0, err
+	}
+
+	var inner struct {
+		ID int64 `json:"id"`
+	}
+	if err := json.Unmarshal([]byte(outer["client"][1]), &inner); err != nil {
+		return 0, err
+	}
+
+	return inner.ID, nil
 }

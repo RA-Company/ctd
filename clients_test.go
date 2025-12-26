@@ -165,3 +165,52 @@ func TestCtd_Clients(t *testing.T) {
 		})
 	}
 }
+
+func TestCtd_CreateClient(t *testing.T) {
+	ctx := t.Context()
+	url, token := getCredentials(t)
+	faker := gofakeit.New(0)
+
+	transport := env.GetEnvStr("API_CREATE_CLIENT_TRANSPORT", "")
+	if transport == "" {
+		t.Skip("API_CREATE_CLIENT_TRANSPORT is not set, skipping create client tests")
+	}
+
+	channel := env.GetEnvInt("API_CREATE_CLIENT_CHANNEL_ID", 0)
+	if channel == 0 {
+		t.Skip("API_CREATE_CLIENT_CHANNEL_ID is not set, skipping create client tests")
+	}
+
+	phone := env.GetEnvStr("API_CREATE_CLIENT_PHONE", "")
+	if phone == "" {
+		t.Skip("API_CREATE_CLIENT_PHONE is not set, skipping create client tests")
+	}
+
+	id := env.GetEnvInt("API_CREATE_CLIENT_ID", 0)
+	if id == 0 {
+		t.Skip("API_CREATE_CLIENT_ID is not set, skipping create client tests")
+	}
+
+	service := &Ctd{}
+	service.Init(url, token)
+
+	t.Run("Create existing client", func(t *testing.T) {
+		got, err := service.CreateClient(ctx, phone, transport, channel, faker.Name(), phone)
+		require.ErrorIs(t, err, ErrorClieantAlreadyExists, "service.CreateClient() should return ErrorClieantAlreadyExists error")
+		require.NotNil(t, got, "service.CreateClient() should return data")
+		require.Equal(t, phone, got.Phone, "service.CreateClient() should return client with correct phone")
+		require.Equal(t, id, got.ID, "service.CreateClient() should return client with correct ID")
+	})
+
+	t.Run("Incorrect channel", func(t *testing.T) {
+		got, err := service.CreateClient(ctx, phone, transport, 0, faker.Name(), phone)
+		require.ErrorIs(t, err, ErrorInvalidChannelID, "service.CreateClient() should return ErrorInvalidChannelID error")
+		require.Nil(t, got, "service.CreateClient() should return data")
+	})
+
+	t.Run("Incorrect transport", func(t *testing.T) {
+		got, err := service.CreateClient(ctx, phone, "invalid_transport", channel, faker.Name(), phone)
+		require.ErrorIs(t, err, ErrorInvalidTransport, "service.CreateClient() should return ErrorInvalidTransport error")
+		require.Nil(t, got, "service.CreateClient() should return data")
+	})
+}
