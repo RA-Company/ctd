@@ -3,10 +3,10 @@ module github.com/ra-company/ctd
 go 1.25.5
 
 require (
-	github.com/brianvoe/gofakeit/v7 v7.12.1
+	github.com/brianvoe/gofakeit/v7 v7.14.0
 	github.com/ra-company/env v1.0.2
 	github.com/ra-company/jsons v1.0.0
-	github.com/ra-company/logging v1.0.8
+	github.com/ra-company/logging v1.0.9
 	github.com/stretchr/testify v1.11.1
 )
 

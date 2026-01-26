@@ -19,6 +19,7 @@ var (
 	ErrorOTPRequired            = fmt.Errorf("otp required")
 	ErrorCaptchRequired         = fmt.Errorf("captcha required")
 	ErrorUserNotFound           = fmt.Errorf("user not found")
+	ErrorPasswordHasExpired     = fmt.Errorf("password has expired")
 )
 
 func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, personal_password, otp, captcha string) (string, error) {
@@ -38,16 +39,6 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 		Captcha:          captcha,
 	}
 
-	type ctdAuthResponse struct {
-		Status  string `json:"status"`
-		AuthKey string `json:"auth_key"`
-		Errors  struct {
-			Error      []string `json:"error"`
-			StatusCode []any    `json:"status_code"`
-		} `json:"errors"`
-		Attempts any `json:"login_attempts_info"`
-	}
-
 	url := fmt.Sprintf("%sapi/user/sign_in?lang=en", dst.Url)
 
 	if personal_login != "" && personal_password != "" {
@@ -62,43 +53,16 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 
 	logging.Logs.Debugf(ctx, "Response: %s", string(result))
 
-	var response ctdAuthResponse
-	err = json.Unmarshal(result, &response)
-	if err != nil {
-		logging.Logs.Errorf(ctx, "%v", err)
-		return "", ErrorInvalidResponse
-	}
-
-	if strings.ToLower(response.Status) == "success" {
+	response, err := dst.newLoginAPIParsing(ctx, result)
+	if err == nil {
 		return "", nil
 	}
 
-	// New version of Chat2Desk API
-	if slices.Index(response.Errors.Error, "user_does_not_exist") != -1 {
-		return "", ErrorUserNotFound
-	}
-
-	if slices.Index(response.Errors.Error, "incorrect_otp") != -1 {
-		return "", ErrorOTPRequired
-	}
-
-	if slices.Index(response.Errors.Error, "captcha") != -1 {
-		return "", ErrorCaptchRequired
-	}
-
-	if slices.Index(response.Errors.Error, "incorrect_password") != -1 {
-		return "", ErrorInvalidLoginOrPassword
-	}
-
-	if slices.Index(response.Errors.Error, "timeout") != -1 {
-		return "10", ErrorTooFast
+	if err != ErrorUnknownError {
+		return "", err
 	}
 
 	// Old version of Chat2Desk API
-	if response.Attempts == nil {
-		return "", ErrorUserNotFound
-	}
-
 	str := strings.ToLower(string(result))
 
 	if strings.Contains(str, "wrong login or password") {
@@ -135,6 +99,10 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 
 	if strings.Contains(str, "e-mail is not a valid email address") {
 		return "", ErrorUserNotFound
+	}
+
+	if strings.Contains(str, "password_expired") {
+		return "", ErrorPasswordHasExpired
 	}
 
 	if strings.Contains(str, "please, try again after") {
@@ -196,6 +164,61 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 				}
 			}
 		}
+	}
+
+	return response, ErrorUnknownError
+}
+
+func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, error) {
+	type ctdAuthResponse struct {
+		Status  string `json:"status"`
+		AuthKey string `json:"auth_key"`
+		Errors  struct {
+			Error           []string `json:"error"`
+			StatusCode      []any    `json:"status_code"`
+			PasswordExpired []string `json:"password_expired"`
+		} `json:"errors"`
+		Attempts any `json:"login_attempts_info"`
+	}
+
+	var response ctdAuthResponse
+
+	if err := json.Unmarshal(result, &response); err != nil {
+		logging.Logs.Errorf(ctx, "Ctd.newLoginAPIParsing->json.Unmarshal() error: %v", err)
+		return "", ErrorInvalidResponse
+	}
+
+	if strings.ToLower(response.Status) == "success" {
+		return "", nil
+	}
+
+	// New version of Chat2Desk API
+	if slices.Index(response.Errors.Error, "user_does_not_exist") != -1 {
+		return "", ErrorUserNotFound
+	}
+
+	if slices.Index(response.Errors.Error, "incorrect_otp") != -1 {
+		return "", ErrorOTPRequired
+	}
+
+	if slices.Index(response.Errors.Error, "captcha") != -1 {
+		return "", ErrorCaptchRequired
+	}
+
+	if slices.Index(response.Errors.Error, "incorrect_password") != -1 {
+		return "", ErrorInvalidLoginOrPassword
+	}
+
+	if slices.Index(response.Errors.Error, "timeout") != -1 {
+		return "10", ErrorTooFast
+	}
+
+	if len(response.Errors.PasswordExpired) > 0 {
+		return "", ErrorPasswordHasExpired
+	}
+
+	if response.Attempts == nil {
+		return "", ErrorUserNotFound
 	}
 
 	return fmt.Sprintf("%v", response.Errors), ErrorUnknownError
