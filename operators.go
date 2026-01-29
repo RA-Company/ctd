@@ -3,18 +3,49 @@ package ctd
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 type Operator struct {
-	ID            int64  `json:"id"`
-	Email         string `json:"email"`
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	Avatar        string `json:"avatar"`
-	Role          string `json:"role"`
-	StatusID      uint8  `json:"status_id"`
-	OpenedDialogs int64  `json:"opened_dialogs"`
-	Online        uint8  `json:"online"`
+	ID              int64  `json:"id"`
+	Email           string `json:"email"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Avatar          string `json:"avatar"`
+	Role            string `json:"role"`
+	StatusID        uint8  `json:"status_id"`
+	OpenedDialogs   int64  `json:"opened_dialogs"`
+	Online          uint8  `json:"online"`
+	Status          string `json:"status"`
+	AccessRightName string `json:"access_right_name"`
+	AccessRightID   int64  `json:"access_right_id"`
+}
+
+func (dst *Operator) GetLegacyRole() string {
+	// Check new API version first
+	if dst.Status != "" {
+		str := strings.ToLower(dst.Status)
+		switch str {
+		case "admin", "disabled", "deleted":
+			return str
+		}
+		str = strings.ToLower(dst.AccessRightName)
+		roles := []string{"Супервайзер", "Supervisor", "Amir", "O supervisor", "El supervisor", "Supervayzer", "Supervizor", "Le superviseur"}
+		for _, role := range roles {
+			if str == strings.ToLower(role) {
+				return "supervisor"
+			}
+		}
+
+		return "operator"
+	}
+
+	// Fallback to old API version
+	if dst.Role != "" {
+		return strings.ToLower(dst.Role)
+	}
+
+	return "operator"
 }
 
 type OperatorsResponse struct {
