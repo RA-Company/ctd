@@ -29,27 +29,27 @@ type ClientsResponse struct {
 // It contains various fields that describe the client, such as ID, name, phone number,
 // avatar, region, country, messages, comments, custom fields, and associated channels and tags.
 type Client struct {
-	ID                    int               `json:"id"`                   // ID: Unique identifier of the client
-	Name                  string            `json:"name"`                 // Name: Name of the client
-	Username              string            `json:"username"`             // Username: Username of the client
-	Comment               string            `json:"comment"`              // Comment: Comment associated with the client
-	AssignedName          string            `json:"assigned_name"`        // AssignedName: Name of the assigned user
-	Phone                 string            `json:"phone"`                // Phone: Phone number of the client
-	ClientPhone           string            `json:"client_phone"`         // ClientPhone: Client's phone number
-	Avatar                string            `json:"avatar"`               // Avatar: URL of the client's avatar
-	RegionID              int               `json:"region_id"`            // RegionID: ID of the region associated with the client
-	CountryID             int               `json:"country_id"`           // CountryID: ID of the country associated with the client
-	FirstClientMessageStr string            `json:"first_client_message"` // FirstClientMessageStr: String representation of the first client message
-	LastClientMessageStr  string            `json:"last_client_message"`  // LastClientMessageStr: String representation of the last client message
-	ExtraComment1         string            `json:"extra_comment_1"`      // ExtraComment1: First extra comment associated with the client
-	ExtraComment2         string            `json:"extra_comment_2"`      // ExtraComment2: Second extra comment associated with the client
-	ExtraComment3         string            `json:"extra_comment_3"`      // ExtraComment3: Third extra comment associated with the client
-	CustomFields          map[string]string `json:"custom_fields"`        // CustomFields: Map of custom fields associated with the client
-	ClientExternalID      string            `json:"client_external_id"`   // ClientExternalID: External ID of the client
-	ExtrnalID             int               `json:"external_id"`          // ExternalID: External ID of the client
-	ExtrnalIDs            map[string]int    `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client
-	Channels              []Channel         `json:"channels"`             // Channels: List of channels associated with the client
-	Tags                  []Tag             `json:"tags"`                 // Tags: List of tags associated with the client
+	ID                    int                        `json:"id"`                   // ID: Unique identifier of the client
+	Name                  string                     `json:"name"`                 // Name: Name of the client
+	Username              string                     `json:"username"`             // Username: Username of the client
+	Comment               string                     `json:"comment"`              // Comment: Comment associated with the client
+	AssignedName          string                     `json:"assigned_name"`        // AssignedName: Name of the assigned user
+	Phone                 string                     `json:"phone"`                // Phone: Phone number of the client
+	ClientPhone           string                     `json:"client_phone"`         // ClientPhone: Client's phone number
+	Avatar                string                     `json:"avatar"`               // Avatar: URL of the client's avatar
+	RegionID              int                        `json:"region_id"`            // RegionID: ID of the region associated with the client
+	CountryID             int                        `json:"country_id"`           // CountryID: ID of the country associated with the client
+	FirstClientMessageStr string                     `json:"first_client_message"` // FirstClientMessageStr: String representation of the first client message
+	LastClientMessageStr  string                     `json:"last_client_message"`  // LastClientMessageStr: String representation of the last client message
+	ExtraComment1         string                     `json:"extra_comment_1"`      // ExtraComment1: First extra comment associated with the client
+	ExtraComment2         string                     `json:"extra_comment_2"`      // ExtraComment2: Second extra comment associated with the client
+	ExtraComment3         string                     `json:"extra_comment_3"`      // ExtraComment3: Third extra comment associated with the client
+	CustomFields          map[string]json.RawMessage `json:"custom_fields"`        // CustomFields: Map of custom fields associated with the client
+	ClientExternalID      string                     `json:"client_external_id"`   // ClientExternalID: External ID of the client
+	ExtrnalID             int                        `json:"external_id"`          // ExternalID: External ID of the client
+	ExtrnalIDs            map[string]int             `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client
+	Channels              []Channel                  `json:"channels"`             // Channels: List of channels associated with the client
+	Tags                  []Tag                      `json:"tags"`                 // Tags: List of tags associated with the client
 }
 
 // APIGetClient retrieves a client by its ID from the Chat2Desk API.

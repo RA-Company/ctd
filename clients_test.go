@@ -2,6 +2,7 @@ package ctd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -213,4 +214,34 @@ func TestCtd_CreateClient(t *testing.T) {
 		require.ErrorIs(t, err, ErrorInvalidTransport, "service.CreateClient() should return ErrorInvalidTransport error")
 		require.Nil(t, got, "service.CreateClient() should return data")
 	})
+}
+
+func TestClientResponse_Unmarshal(t *testing.T) {
+	type args struct {
+		result []byte
+	}
+	tests := []struct {
+		name    string
+		json    string
+		want    *ClientResponse
+		wantErr error
+	}{
+		{
+			name:    "Valid client response",
+			json:    `{"data":{"id":31155394,"name":"[chat] a72b222c5a5272a6bb8e","username":null,"comment":"test@test.com","assigned_name":"[chat] a72b222c5a5272a6bb8e","phone":"[chat] a72b222c5a5272a6bb8e","client_phone":null,"avatar":"https://storage-support.chat2desk.com/https://support.chat2desk.com/images/live_chat_ava.png","region_id":null,"country_id":null,"first_client_message":"2025-05-26T08:21:30 UTC","last_client_message":"2026-02-06T13:37:10 UTC","extra_comment_1":null,"extra_comment_2":null,"extra_comment_3":null,"custom_fields":{"6":"Дмитрий","10":"BORK (отключён)","12":"0 руб.","13":"https://chat2desk.com/","888":268775,"891":"https://test.com/detail/35104697","892":21,"895":"test@test.com","897":"test@test.com","898":"RUS01-268775","902":"1748247654111910756","old_email":"test@test.com","past_company_id":268775,"current_amo_task":"https://test.com/detail/35104697"},"client_external_id":null,"external_id":null,"external_ids":{},"channels":[{"id":126,"transports":["widget"]}],"tags":[{"id":996,"label":"R","description":"Русский язык","group_id":313,"group_name":"Язык клиента"},{"id":4421,"label":"В амо","description":"Этот клиент загружен в amoCRM","group_id":12,"group_name":"Прочее"},{"id":2960,"label":"Т","description":"Этому клиенту предложили подписаться на канал в Телеграме","group_id":2,"group_name":"1Статус клиента"},{"id":4920,"label":"Не отпр","description":"Не отправлять оценку!","group_id":269,"group_name":"Оценки чатов"}]},"status":"success"}`,
+			want:    nil,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got ClientResponse
+			err := json.Unmarshal([]byte(tt.json), &got)
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr, "json.Unmarshal() error")
+			} else {
+				require.NoError(t, err, "json.Unmarshal() should not return an error")
+			}
+		})
+	}
 }
