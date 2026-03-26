@@ -36,8 +36,6 @@ func (dst *Operator) GetLegacyRole() string {
 				return "supervisor"
 			}
 		}
-
-		return "operator"
 	}
 
 	// Fallback to old API version

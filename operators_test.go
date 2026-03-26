@@ -123,6 +123,11 @@ func TestOperator_GetLegacyRole(t *testing.T) {
 			json: `{"id":618,"email":"test@test.com","first_name":"John","last_name":"Doe","role":"operator","phone":"+7 777 222 0509","avatar":"https://test.com/companies/company_479/users/avatars/424272/usera66bc5820bb7ae46d587.jpg","last_visit":"2026-01-28T13:47:10 UTC","online":0,"offline_type":null,"external_id":"","opened_dialogs":0,"status_id":0,"two_factor":true}`,
 			want: "operator",
 		},
+		{
+			name: "Supervisor role by Role field",
+			json: `{"id":618,"email":"test@test.com","first_name":"John","last_name":"Doe","role":"supervisor","phone":"+7 777 222 0509","avatar":"https://test.com/companies/company_479/users/avatars/424272/usera66bc5820bb7ae46d587.jpg","last_visit":"2026-01-28T13:47:10 UTC","online":0,"offline_type":null,"external_id":"","opened_dialogs":0,"status_id":0,"two_factor":true,"status":"enabled","access_right_name":"Direcrtors"}`,
+			want: "supervisor",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
