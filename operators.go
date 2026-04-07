@@ -32,10 +32,12 @@ func (dst *Operator) GetLegacyRole() string {
 		str = strings.ToLower(dst.AccessRightName)
 		roles := []string{"Супервайзер", "Supervisor", "Amir", "O supervisor", "El supervisor", "Supervayzer", "Supervizor", "Le superviseur"}
 		for _, role := range roles {
-			if str == strings.ToLower(role) {
+			role := strings.ToLower(role)
+			if str == role || strings.Contains(str, fmt.Sprintf("(%s)", role)) {
 				return "supervisor"
 			}
 		}
+		return "operator"
 	}
 
 	// Fallback to old API version

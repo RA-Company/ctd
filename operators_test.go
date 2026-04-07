@@ -89,6 +89,11 @@ func TestOperator_GetLegacyRole(t *testing.T) {
 			want: "supervisor",
 		},
 		{
+			name: "Supervisor role by AccessRightName in brackets",
+			json: `{"id":311416,"email":"test@test.com","phone":"","role":"operator","access_right_id":54521,"online":1,"offline_type":"busy","avatar":null,"opened_dialogs":0,"first_name":"John","last_name":"Doe","external_id":"","last_visit":"2024-11-13T10:55:52 UTC","status_id":1,"two_factor":false,"status":"enabled","access_right_name":"ИТ департамент (супервайзер)"}`,
+			want: "supervisor",
+		},
+		{
 			name: "Deleted role by AccessRightName",
 			json: `{"id":313753,"email":"test@test.com","phone":"+7 701 763 0465","role":"deleted","access_right_id":null,"online":0,"offline_type":null,"avatar":null,"opened_dialogs":0,"first_name":"John","last_name":"Doe","external_id":"","last_visit":null,"status_id":0,"two_factor":false,"status":"deleted","access_right_name":null}`,
 			want: "deleted",
