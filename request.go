@@ -73,6 +73,38 @@ func (dst *RequestMessage) Message() string {
 	return ""
 }
 
+// MessageFormat returns the format of the message based on the available fields, prioritizing text, video, photo, audio, PDF, and coordinates in that order.
+//
+// Returns:
+//   - string: The format of the message based on the available fields ("text", "video", "photo", "audio", "pdf", "coordinates", or "unknown").
+func (dst *RequestMessage) MessageFormat() string {
+	if dst.Text != "" {
+		return "text"
+	}
+
+	if dst.Video != "" {
+		return "video"
+	}
+
+	if dst.Photo != "" {
+		return "photo"
+	}
+
+	if dst.Audio != "" {
+		return "audio"
+	}
+
+	if dst.PDF != "" {
+		return "pdf"
+	}
+
+	if dst.Coordinates != "" {
+		return "coordinates"
+	}
+
+	return "unknown"
+}
+
 // APIRequestMessages retrieves a list of messages for a specific request from the Chat2Desk API.
 // It constructs the API endpoint URL using the provided request ID, sends a GET request to the API,
 // and returns the response data as a slice of RequestMessage structs.
