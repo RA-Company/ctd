@@ -192,7 +192,7 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, 
 		return "", nil
 	}
 
-	if str, err := dst.parseLoginErrorSrings(ctx, response.Errors.Error); err != nil {
+	if str, err := dst.parseLoginErrorSrings(response.Errors.Error); err != nil {
 		if err != ErrorInvalidResponse {
 			return str, err
 		}
@@ -209,11 +209,10 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, 
 	return fmt.Sprintf("%v", response.Errors), ErrorUnknownError
 }
 
-func (dst *Ctd) parseLoginErrorSrings(ctx context.Context, data json.RawMessage) (string, error) {
+func (dst *Ctd) parseLoginErrorSrings(data json.RawMessage) (string, error) {
 	results := []string{}
 
 	if err := json.Unmarshal(data, &results); err != nil {
-		logging.Logs.Errorf(ctx, "Ctd.parseLoginErrorSrings->json.Unmarshal() error: %v", err)
 		return "", ErrorInvalidResponse
 	}
 

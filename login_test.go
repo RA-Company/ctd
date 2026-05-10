@@ -51,20 +51,16 @@ func TestCtd_newLoginAPIParsing(t *testing.T) {
 		{
 			name: "Password has expired",
 			result: `{
-  				"status": "error",
-  				"errors": {
-    			"password": [
-	      			"{\"access\":false,\"reason\":\"password\",\"message\":\"change_password_required\",\"confirm_hash\":\"d8f3187f13c69aa0f0395f640701fa33\",\"password_expired\":\"Your password has expired. Please change your password. You will be logged in immediately after changing your password.\"}"
-    			],
-    			"password_expired": [
-	    	  		"Your password has expired. Please change your password. You will be logged in immediately after changing your password."
-    			]
-  				},
-  				"login_attempts_info": {
-    				"max_attempts_number": 5,
-    				"failed_attempts_number": 17,
-    				"failed_login_attempt_date": 1690804029
-  				}
+				"status":"error",
+				"errors":{
+					"error":[
+						{"access":false,"reason":"password","message":"Your password has expired. Please change your password. You will be logged in immediately after changing your password.","confirm_hash":"f256674c322314e4c83e612f8b4db224"}
+					],
+					"status_code":[403],
+					"password_expired":["Your password has expired. Please change your password. You will be logged in immediately after changing your password."],
+					"password":["{\"access\":false,\"reason\":\"password\",\"message\":\"Your password has expired. Please change your password. You will be logged in immediately after changing your password.\",\"confirm_hash\":\"f256674c322314e4c83e612f8b4db224\"}"]
+				},
+				"login_attempts_info":{"max_attempts_number":5,"failed_attempts_number":1,"failed_login_attempt_date":1778381910}
 			}`,
 			want:    "",
 			wantErr: ErrorPasswordHasExpired,
