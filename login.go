@@ -174,9 +174,9 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, 
 		Status  string `json:"status"`
 		AuthKey string `json:"auth_key"`
 		Errors  struct {
-			Error           []string `json:"error"`
-			StatusCode      []any    `json:"status_code"`
-			PasswordExpired []string `json:"password_expired"`
+			Error           json.RawMessage `json:"error"`
+			StatusCode      []any           `json:"status_code"`
+			PasswordExpired []string        `json:"password_expired"`
 		} `json:"errors"`
 		Attempts any `json:"login_attempts_info"`
 	}
@@ -192,25 +192,10 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, 
 		return "", nil
 	}
 
-	// New version of Chat2Desk API
-	if slices.Index(response.Errors.Error, "user_does_not_exist") != -1 {
-		return "", ErrorUserNotFound
-	}
-
-	if slices.Index(response.Errors.Error, "incorrect_otp") != -1 {
-		return "", ErrorOTPRequired
-	}
-
-	if slices.Index(response.Errors.Error, "captcha") != -1 {
-		return "", ErrorCaptchRequired
-	}
-
-	if slices.Index(response.Errors.Error, "incorrect_password") != -1 {
-		return "", ErrorInvalidLoginOrPassword
-	}
-
-	if slices.Index(response.Errors.Error, "timeout") != -1 {
-		return "10", ErrorTooFast
+	if str, err := dst.parseLoginErrorSrings(ctx, response.Errors.Error); err != nil {
+		if err != ErrorInvalidResponse {
+			return str, err
+		}
 	}
 
 	if len(response.Errors.PasswordExpired) > 0 {
@@ -222,4 +207,36 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (string, 
 	}
 
 	return fmt.Sprintf("%v", response.Errors), ErrorUnknownError
+}
+
+func (dst *Ctd) parseLoginErrorSrings(ctx context.Context, data json.RawMessage) (string, error) {
+	results := []string{}
+
+	if err := json.Unmarshal(data, &results); err != nil {
+		logging.Logs.Errorf(ctx, "Ctd.parseLoginErrorSrings->json.Unmarshal() error: %v", err)
+		return "", ErrorInvalidResponse
+	}
+
+	// New version of Chat2Desk API
+	if slices.Index(results, "user_does_not_exist") != -1 {
+		return "", ErrorUserNotFound
+	}
+
+	if slices.Index(results, "incorrect_otp") != -1 {
+		return "", ErrorOTPRequired
+	}
+
+	if slices.Index(results, "captcha") != -1 {
+		return "", ErrorCaptchRequired
+	}
+
+	if slices.Index(results, "incorrect_password") != -1 {
+		return "", ErrorInvalidLoginOrPassword
+	}
+
+	if slices.Index(results, "timeout") != -1 {
+		return "10", ErrorTooFast
+	}
+
+	return "", nil
 }
