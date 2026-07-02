@@ -211,7 +211,7 @@ func (dst *Ctd) CloseDialog(ctx context.Context, dialog_id, opertor_id, initiato
 
 	if data.Status != "success" {
 		dst.Error(ctx, "Failed to close dialog by ID: %s", data.Errors)
-		if strings.Contains(fmt.Sprintf("%v", data.Errors), "has already state") {
+		if strings.Contains(fmt.Sprintf("%s", data.Errors), "already has state") {
 			return ErrorDialogClosed
 		}
 		return ErrorInvalidParameters

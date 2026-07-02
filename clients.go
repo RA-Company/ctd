@@ -175,7 +175,7 @@ func (dst *Ctd) GetClient(ctx context.Context, id int) (*Client, error) {
 		return nil, err
 	}
 
-	if strings.Contains(fmt.Sprintf("%v", response.Errors), " not found") {
+	if strings.Contains(fmt.Sprintf("%s", response.Errors), " not found") {
 		return nil, ErrorInvalidID
 	}
 

@@ -79,8 +79,18 @@ func TestOperator_GetLegacyRole(t *testing.T) {
 		want string
 	}{
 		{
-			name: "Admin role by AccessRightName",
+			name: "Admin role by status",
 			json: `{"id": 617,"email": "test@test.com","phone": null,"role": "admin","access_right_id": null,"online": 1,"offline_type": null,"avatar": null,"opened_dialogs": 0,"first_name": "John","last_name": "Doe","external_id": null,"last_visit": "2026-01-29T06:14:41 UTC","status_id": 0,"two_factor": false,"status": "admin","access_right_name": null}`,
+			want: "admin",
+		},
+		{
+			name: "Admin role by AccessRightName",
+			json: `{"id": 617,"email": "test@test.com","phone": null,"role": "operator","access_right_id": null,"online": 1,"offline_type": null,"avatar": null,"opened_dialogs": 0,"first_name": "John","last_name": "Doe","external_id": null,"last_visit": "2026-01-29T06:14:41 UTC","status_id": 0,"two_factor": false,"status": "enabled","access_right_name": "Администратор"}`,
+			want: "admin",
+		},
+		{
+			name: "Admin role by AccessRightName in brackets",
+			json: `{"id": 617,"email": "test@test.com","phone": null,"role": "operator","access_right_id": null,"online": 1,"offline_type": null,"avatar": null,"opened_dialogs": 0,"first_name": "John","last_name": "Doe","external_id": null,"last_visit": "2026-01-29T06:14:41 UTC","status_id": 0,"two_factor": false,"status": "enabled","access_right_name": "ИТ департамент (admin)"}`,
 			want: "admin",
 		},
 		{
@@ -109,7 +119,7 @@ func TestOperator_GetLegacyRole(t *testing.T) {
 			want: "operator",
 		},
 		{
-			name: "Supervisor role by Role field",
+			name: "Supervisor role by Role field when AccessRightName is empty",
 			json: `{"id":962,"email":"test@test.com","first_name":"John","last_name":"Doe","role":"supervisor","phone":"+7 700 390 1850","avatar":"https://test.com/companies/company_479/users/avatars/user5e4e802f76de7.jpg","last_visit":"2026-01-29T07:38:48 UTC","online":1,"offline_type":null,"external_id":null,"opened_dialogs":0,"status_id":0,"two_factor":true}`,
 			want: "supervisor",
 		},
@@ -129,9 +139,9 @@ func TestOperator_GetLegacyRole(t *testing.T) {
 			want: "operator",
 		},
 		{
-			name: "Supervisor role by Role field",
+			name: "Supervisor by Role but operator by AccessRightName",
 			json: `{"id":618,"email":"test@test.com","first_name":"John","last_name":"Doe","role":"supervisor","phone":"+7 777 222 0509","avatar":"https://test.com/companies/company_479/users/avatars/424272/usera66bc5820bb7ae46d587.jpg","last_visit":"2026-01-28T13:47:10 UTC","online":0,"offline_type":null,"external_id":"","opened_dialogs":0,"status_id":0,"two_factor":true,"status":"enabled","access_right_name":"Direcrtors"}`,
-			want: "supervisor",
+			want: "operator",
 		},
 	}
 	for _, tt := range tests {

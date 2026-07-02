@@ -37,6 +37,13 @@ func (dst *Operator) GetLegacyRole() string {
 				return "supervisor"
 			}
 		}
+		roles = []string{"Администратор", "Administrator", "Admin", "O administrador", "El administrador", "Administrateur", "Адміністратор"}
+		for _, role := range roles {
+			role := strings.ToLower(role)
+			if str == role || strings.Contains(str, fmt.Sprintf("(%s)", role)) {
+				return "admin"
+			}
+		}
 		return "operator"
 	}
 
