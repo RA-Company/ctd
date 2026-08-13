@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ra-company/jsons"
+	"github.com/ra-company/params"
 )
 
 type DialogResponse struct {
@@ -23,8 +23,8 @@ type DialogsResponse struct {
 type Dialog struct {
 	ID            int64       `json:"id"`              // ID: Dialog ID
 	State         string      `json:"state"`           // State: Dialog state
-	Begin         jsons.Time  `json:"begin"`           // Begin: Dialog begin time
-	End           jsons.Time  `json:"end"`             // End: Dialog end time
+	Begin         params.Time `json:"begin"`           // Begin: Dialog begin time
+	End           params.Time `json:"end"`             // End: Dialog end time
 	LastMessage   Message     `json:"last_message"`    // LastMessage: Last message in dialog
 	LastRequestID int64       `json:"last_request_id"` // LastRequestID: Last request ID
 	Messages      json.Number `json:"messages"`        // Messages: Number of messages in dialog
