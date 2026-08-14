@@ -259,7 +259,7 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 	if response != nil {
 		err = json.Unmarshal(body, response)
 		if err != nil {
-			dst.Error(ctx, "Failed to unmarshal response (%s): %v", body, err)
+			dst.Errorf(ctx, "Failed to unmarshal response (%s): %v", body, err)
 			return body, ErrorInvalidResponse
 		}
 	}
