@@ -7,8 +7,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-
-	"github.com/ra-company/logging"
 )
 
 var (
@@ -18,10 +16,28 @@ var (
 	ErrorMasterPasswordRequired = fmt.Errorf("master password required")
 	ErrorMasterNotAllowed       = fmt.Errorf("master not allowed")
 	ErrorOTPRequired            = fmt.Errorf("otp required")
-	ErrorCaptchRequired         = fmt.Errorf("captcha required")
+	ErrorCaptchaRequired        = fmt.Errorf("captcha required")
 	ErrorUserNotFound           = fmt.Errorf("user not found")
 	ErrorPasswordHasExpired     = fmt.Errorf("password has expired")
 )
+
+// legacyLoginRules maps the texts of the responses of the old versions of Chat2Desk API to errors.
+// The texts are lower case and matched against the whole response in the given order, the first match wins.
+var legacyLoginRules = []struct {
+	text string
+	err  error
+}{
+	{"wrong login or password", ErrorInvalidLoginOrPassword},
+	{"this account is blocked", ErrorAccountIsBlocked},
+	{`"master_login":[true]`, ErrorMasterPasswordRequired},
+	{"login with master-password is not permitted using this method", ErrorMasterPasswordRequired},
+	{"access under master password is not allowed by the account administrator", ErrorMasterNotAllowed},
+	{"enter one time password", ErrorOTPRequired},
+	{"please, enter captcha to log in", ErrorCaptchaRequired},
+	{"user_does_not_exist", ErrorUserNotFound},
+	{"e-mail is not a valid email address", ErrorUserNotFound},
+	{"password_expired", ErrorPasswordHasExpired},
+}
 
 // LoginResult is the result of Login.
 type LoginResult struct {
@@ -36,7 +52,7 @@ type LoginResult struct {
 //   - LoginResult with AuthKey on success, with RetryDelay (seconds) when ErrorTooFast is returned,
 //     or with the raw response body in Error when ErrorUnknownError is returned.
 //   - An error if the login fails.
-func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, personal_password, otp, captcha string) (res LoginResult, err error) {
+func (dst *Ctd) Login(ctx context.Context, login, password, personalLogin, personalPassword, otp, captcha string) (res LoginResult, err error) {
 	data := struct {
 		Email            string `json:"email"`              // Chat2Desk login
 		Password         string `json:"password"`           // Chat2Desk password
@@ -47,15 +63,15 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 	}{
 		Email:            login,
 		Password:         password,
-		PersonalEmail:    personal_login,
-		PersonalPassword: personal_password,
+		PersonalEmail:    personalLogin,
+		PersonalPassword: personalPassword,
 		OTP:              otp,
 		Captcha:          captcha,
 	}
 
 	url := fmt.Sprintf("%sapi/user/sign_in?lang=en", dst.Url)
 
-	if personal_login != "" && personal_password != "" {
+	if personalLogin != "" && personalPassword != "" {
 		url = fmt.Sprintf("%sapi/user/master_sign_in?lang=en", dst.Url)
 	}
 
@@ -68,7 +84,7 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 	// The response of a failed login contains no auth key, so it is safe to log it.
 	defer func() {
 		if err != nil {
-			logging.Logs.Debugf(ctx, "Response: %s", string(result))
+			dst.Debugf(ctx, "Response: %s", string(result))
 		}
 	}()
 
@@ -81,103 +97,31 @@ func (dst *Ctd) Login(ctx context.Context, login, password, personal_login, pers
 		return response, err
 	}
 
-	// Old version of Chat2Desk API
+	// Old versions of Chat2Desk API
 	str := strings.ToLower(string(result))
 
-	if strings.Contains(str, "wrong login or password") {
-		return LoginResult{}, ErrorInvalidLoginOrPassword
-	}
-
-	if strings.Contains(str, "this account is blocked") {
-		return LoginResult{}, ErrorAccountIsBlocked
-	}
-
-	if strings.Contains(str, "\"master_login\":[true]") {
-		return LoginResult{}, ErrorMasterPasswordRequired
-	}
-
-	if strings.Contains(str, "login with master-password is not permitted using this method") {
-		return LoginResult{}, ErrorMasterPasswordRequired
-	}
-
-	if strings.Contains(str, "access under master password is not allowed by the account administrator") {
-		return LoginResult{}, ErrorMasterNotAllowed
-	}
-
-	if strings.Contains(str, "enter one time password") {
-		return LoginResult{}, ErrorOTPRequired
-	}
-
-	if strings.Contains(str, "please, enter captcha to log in") {
-		return LoginResult{}, ErrorCaptchRequired
-	}
-
-	if strings.Contains(str, "user_does_not_exist") {
-		return LoginResult{}, ErrorUserNotFound
-	}
-
-	if strings.Contains(str, "e-mail is not a valid email address") {
-		return LoginResult{}, ErrorUserNotFound
-	}
-
-	if strings.Contains(str, "password_expired") {
-		return LoginResult{}, ErrorPasswordHasExpired
+	for _, rule := range legacyLoginRules {
+		if strings.Contains(str, rule.text) {
+			return LoginResult{}, rule.err
+		}
 	}
 
 	if strings.Contains(str, "please, try again after") {
 		return LoginResult{RetryDelay: tooFastDelay(str)}, ErrorTooFast
 	}
 
-	// Very Old version of Chat2Desk API
-	type ctdAuthResponseOld struct {
-		Status   string           `json:"status"`
-		AuthKey  string           `json:"auth_key"`
-		Errors   map[string][]any `json:"errors"`
-		Attempts any              `json:"login_attempts_info"`
+	var responseOld struct {
+		Errors map[string][]any `json:"errors"`
 	}
 
-	var responseOld ctdAuthResponseOld
-	err = json.Unmarshal(result, &responseOld)
-	if err != nil {
-		logging.Logs.Errorf(ctx, "%v", err)
+	if err = json.Unmarshal(result, &responseOld); err != nil {
+		dst.Errorf(ctx, "%v", err)
 		return LoginResult{}, ErrorInvalidResponse
 	}
 
-	for key, value := range responseOld.Errors {
-		switch key {
-		case "password":
-			for _, v := range value {
-				str := strings.ToLower(fmt.Sprintf("%v", v))
-				if strings.Contains(str, "wrong login or password") {
-					return LoginResult{}, ErrorInvalidLoginOrPassword
-				}
-				if strings.Contains(str, "this account is blocked") {
-					return LoginResult{}, ErrorAccountIsBlocked
-				}
-				if strings.Contains(str, "login with master-password is not permitted using this method") {
-					return LoginResult{}, ErrorMasterPasswordRequired
-				}
-				if strings.Contains(str, "access under master password is not allowed by the account administrator") {
-					return LoginResult{}, ErrorMasterNotAllowed
-				}
-			}
-		case "brute_force":
-			for _, v := range value {
-				str := strings.ToLower(fmt.Sprintf("%v", v))
-				if strings.Contains(str, "please, try again after") {
-					return LoginResult{RetryDelay: tooFastDelay(str)}, ErrorTooFast
-				}
-				if strings.Contains(str, "please, enter captcha to log in") {
-					return LoginResult{}, ErrorCaptchRequired
-				}
-			}
-		case "one_time_password":
-			for _, v := range value {
-				str := strings.ToLower(fmt.Sprintf("%v", v))
-				if strings.Contains(str, "must be filled") {
-					return LoginResult{}, ErrorOTPRequired
-				}
-			}
+	for _, v := range responseOld.Errors["one_time_password"] {
+		if strings.Contains(strings.ToLower(fmt.Sprintf("%v", v)), "must be filled") {
+			return LoginResult{}, ErrorOTPRequired
 		}
 	}
 
@@ -199,7 +143,7 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (LoginRes
 	var response ctdAuthResponse
 
 	if err := json.Unmarshal(result, &response); err != nil {
-		logging.Logs.Errorf(ctx, "Ctd.newLoginAPIParsing->json.Unmarshal() error: %v", err)
+		dst.Errorf(ctx, "Ctd.newLoginAPIParsing->json.Unmarshal() error: %v", err)
 		return LoginResult{}, ErrorInvalidResponse
 	}
 
@@ -207,7 +151,7 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (LoginRes
 		return LoginResult{AuthKey: response.AuthKey}, nil
 	}
 
-	if delay, err := dst.parseLoginErrorSrings(response.Errors.Error); err != nil {
+	if delay, err := dst.parseLoginErrorStrings(response.Errors.Error); err != nil {
 		if err != ErrorInvalidResponse {
 			return LoginResult{RetryDelay: delay}, err
 		}
@@ -224,7 +168,7 @@ func (dst *Ctd) newLoginAPIParsing(ctx context.Context, result []byte) (LoginRes
 	return LoginResult{}, ErrorUnknownError
 }
 
-func (dst *Ctd) parseLoginErrorSrings(data json.RawMessage) (int, error) {
+func (dst *Ctd) parseLoginErrorStrings(data json.RawMessage) (int, error) {
 	results := []string{}
 
 	if err := json.Unmarshal(data, &results); err != nil {
@@ -241,7 +185,7 @@ func (dst *Ctd) parseLoginErrorSrings(data json.RawMessage) (int, error) {
 	}
 
 	if slices.Index(results, "captcha") != -1 {
-		return 0, ErrorCaptchRequired
+		return 0, ErrorCaptchaRequired
 	}
 
 	if slices.Index(results, "incorrect_password") != -1 {

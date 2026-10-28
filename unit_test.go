@@ -135,7 +135,7 @@ func TestClient_UnmarshalJSON_ExternalID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var client Client
 			require.NoError(t, json.Unmarshal([]byte(tt.json), &client))
-			require.Equal(t, tt.want, client.ExtrnalID)
+			require.Equal(t, tt.want, client.ExternalID)
 			require.Equal(t, 1, client.ID)
 		})
 	}
@@ -143,15 +143,15 @@ func TestClient_UnmarshalJSON_ExternalID(t *testing.T) {
 	t.Run("nested in response", func(t *testing.T) {
 		var response ClientResponse
 		require.NoError(t, json.Unmarshal([]byte(`{"data":{"id":2,"name":"n","external_id":7},"status":"success"}`), &response))
-		require.Equal(t, "7", response.Data.ExtrnalID)
+		require.Equal(t, "7", response.Data.ExternalID)
 		require.Equal(t, "n", response.Data.Name)
 	})
 
 	t.Run("in list", func(t *testing.T) {
 		var response ClientsResponse
 		require.NoError(t, json.Unmarshal([]byte(`{"data":[{"id":1,"external_id":3},{"id":2,"external_id":"x"}],"status":"success"}`), &response))
-		require.Equal(t, "3", response.Data[0].ExtrnalID)
-		require.Equal(t, "x", response.Data[1].ExtrnalID)
+		require.Equal(t, "3", response.Data[0].ExternalID)
+		require.Equal(t, "x", response.Data[1].ExternalID)
 	})
 
 	t.Run("invalid type", func(t *testing.T) {
@@ -193,7 +193,7 @@ func TestCtd_CreateClient_AlreadyExists(t *testing.T) {
 	ctd := newTestCtd(t, respond(`{"status":"error","errors":{"client":["Client already exists","{\"id\":55}"]}}`))
 
 	client, err := ctd.CreateClient(t.Context(), "+100", "whatsapp", 1, "nick", "")
-	require.ErrorIs(t, err, ErrorClieantAlreadyExists)
+	require.ErrorIs(t, err, ErrorClientAlreadyExists)
 	require.NotNil(t, client)
 	require.Equal(t, 55, client.ID)
 }
@@ -385,14 +385,14 @@ func TestCtd_Post_MarshalError(t *testing.T) {
 func TestClient_UnmarshalJSON_ExternalIDs(t *testing.T) {
 	var client Client
 	require.NoError(t, json.Unmarshal([]byte(`{"id":1,"external_ids":{"a":1,"b":"x","c":null}}`), &client))
-	require.Equal(t, map[string]string{"a": "1", "b": "x", "c": ""}, client.ExtrnalIDs)
+	require.Equal(t, map[string]string{"a": "1", "b": "x", "c": ""}, client.ExternalIDs)
 
 	require.NoError(t, json.Unmarshal([]byte(`{"id":1,"external_ids":{}}`), &client))
-	require.NotNil(t, client.ExtrnalIDs)
-	require.Empty(t, client.ExtrnalIDs)
+	require.NotNil(t, client.ExternalIDs)
+	require.Empty(t, client.ExternalIDs)
 
 	require.NoError(t, json.Unmarshal([]byte(`{"id":1,"external_ids":null}`), &client))
-	require.Nil(t, client.ExtrnalIDs)
+	require.Nil(t, client.ExternalIDs)
 
 	require.Error(t, json.Unmarshal([]byte(`{"id":1,"external_ids":{"a":[1]}}`), &client))
 }
@@ -477,8 +477,48 @@ func TestCtd_CreateClient_EmailAlreadyExistsUnit(t *testing.T) {
 	ctd := newTestCtd(t, respond(`{"status":"error","errors":{"client":["Client already exists","{\"id\":88}"]}}`))
 
 	client, err := ctd.CreateClient(t.Context(), "user@example.com", "email", 5, "John", "")
-	require.ErrorIs(t, err, ErrorClieantAlreadyExists)
+	require.ErrorIs(t, err, ErrorClientAlreadyExists)
 	require.NotNil(t, client)
 	require.Equal(t, 88, client.ID)
 	require.Equal(t, "user@example.com", client.Phone)
+}
+
+func TestCtd_Login_LegacyErrors(t *testing.T) {
+	const attempts = `,"login_attempts_info":{"max_attempts_number":5}`
+
+	tests := []struct {
+		name    string
+		body    string
+		want    LoginResult
+		wantErr error
+	}{
+		{"wrong password", `{"status":"error","errors":{"password":["Wrong login or password"]}` + attempts + `}`, LoginResult{}, ErrorInvalidLoginOrPassword},
+		{"blocked", `{"status":"error","errors":{"password":["This account is blocked"]}` + attempts + `}`, LoginResult{}, ErrorAccountIsBlocked},
+		{"master login flag", `{"status":"error","errors":{"master_login":[true]}` + attempts + `}`, LoginResult{}, ErrorMasterPasswordRequired},
+		{"master password required", `{"status":"error","errors":{"password":["Login with master-password is not permitted using this method"]}` + attempts + `}`, LoginResult{}, ErrorMasterPasswordRequired},
+		{"master not allowed", `{"status":"error","errors":{"password":["Access under master password is not allowed by the account administrator"]}` + attempts + `}`, LoginResult{}, ErrorMasterNotAllowed},
+		{"otp required", `{"status":"error","errors":{"one_time_password":["Enter one time password"]}` + attempts + `}`, LoginResult{}, ErrorOTPRequired},
+		{"otp must be filled", `{"status":"error","errors":{"one_time_password":["The one time password field must be filled"]}` + attempts + `}`, LoginResult{}, ErrorOTPRequired},
+		{"captcha", `{"status":"error","errors":{"brute_force":["Please, enter captcha to log in"]}` + attempts + `}`, LoginResult{}, ErrorCaptchaRequired},
+		{"user does not exist", `{"status":"error","errors":{"email":["user_does_not_exist"]}` + attempts + `}`, LoginResult{}, ErrorUserNotFound},
+		{"invalid email", `{"status":"error","errors":{"email":["The e-mail is not a valid email address"]}` + attempts + `}`, LoginResult{}, ErrorUserNotFound},
+		{"password expired", `{"status":"error","errors":{"password":["password_expired"]}` + attempts + `}`, LoginResult{}, ErrorPasswordHasExpired},
+		{"too fast", `{"status":"error","errors":{"brute_force":["Please, try again after 30 seconds"]}` + attempts + `}`, LoginResult{RetryDelay: 30}, ErrorTooFast},
+		{"first rule wins", `{"status":"error","errors":{"password":["Wrong login or password","This account is blocked"]}` + attempts + `}`, LoginResult{}, ErrorInvalidLoginOrPassword},
+		{"blocked before captcha", `{"status":"error","errors":{"password":["This account is blocked"],"brute_force":["Please, enter captcha to log in"]}` + attempts + `}`, LoginResult{}, ErrorAccountIsBlocked},
+		{"unknown key with unknown text", `{"status":"error","errors":{"foo":["bar"]}` + attempts + `}`, LoginResult{Error: `{"status":"error","errors":{"foo":["bar"]}` + attempts + `}`}, ErrorUnknownError},
+		{"must be filled under another key", `{"status":"error","errors":{"foo":["must be filled"]}` + attempts + `}`, LoginResult{Error: `{"status":"error","errors":{"foo":["must be filled"]}` + attempts + `}`}, ErrorUnknownError},
+		{"errors of unexpected type", `{"status":"error","errors":{"foo":"bar"}` + attempts + `}`, LoginResult{}, ErrorInvalidResponse},
+		{"not json", `<html>`, LoginResult{}, ErrorInvalidResponse},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctd := newTestCtd(t, respond(tt.body))
+
+			got, err := ctd.Login(t.Context(), "login", "password", "", "", "", "")
+			require.ErrorIs(t, err, tt.wantErr)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }

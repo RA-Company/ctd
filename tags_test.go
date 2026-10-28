@@ -14,8 +14,9 @@ func TestCtd_Tags(t *testing.T) {
 	url, token := getCredentials(t)
 
 	tagID := int64(env.GetEnvInt("API_TAG_ID", 0))
-	require.NotEqual(t, 0, tagID, "API_TAG_ID must be set in .env file or .settings")
-
+	if tagID == 0 {
+		t.Skip("API_TAG_ID must be set in .env file or .settings, skipping the test")
+	}
 	tests := []struct {
 		name   string
 		token  string
@@ -110,8 +111,9 @@ func TestCtd_Tags(t *testing.T) {
 	})
 
 	requestID := env.GetEnvInt("API_REQUEST_ID", 0)
-	require.NotEqual(t, 0, requestID, "API_REQUEST_ID must be set in .env file or .settings")
-
+	if requestID == 0 {
+		t.Skip("API_REQUEST_ID must be set in .env file or .settings, skipping the test")
+	}
 	t.Run("02 Assign tags to request", func(t *testing.T) {
 		dst := &Ctd{}
 		t.Run("Invalid token", func(t *testing.T) {
@@ -187,8 +189,9 @@ func TestCtd_Tags(t *testing.T) {
 	})
 
 	clientID := env.GetEnvInt("API_CLIENT_ID", 0)
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file or .settings")
-
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file or .settings, skipping the test")
+	}
 	t.Run("04 Assign tags to client", func(t *testing.T) {
 		dst := &Ctd{}
 		t.Run("Invalid token", func(t *testing.T) {

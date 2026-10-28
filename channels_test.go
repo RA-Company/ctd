@@ -67,10 +67,12 @@ func TestCtd_Channels(t *testing.T) {
 
 func getCredentials(t *testing.T) (string, string) {
 	url := env.GetEnvUrl("API_URL", "")
-	require.NotEqual(t, "", url, "API_URL must be set in .env file or .settings")
-
+	if url == "" {
+		t.Skip("API_URL must be set in .env file or .settings, skipping the test")
+	}
 	token := env.GetEnvStr("API_TOKEN", "")
-	require.NotEqual(t, "", token, "API_TOKEN must be set in .env file or .settings")
-
+	if token == "" {
+		t.Skip("API_TOKEN must be set in .env file or .settings, skipping the test")
+	}
 	return url, token
 }

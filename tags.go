@@ -44,13 +44,13 @@ type Tag struct {
 // Returns:
 //   - A pointer to a TagsResponse struct containing the list of tags
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) APIGetTags(ctx context.Context, offset, limit int) (*TagsResponse, error) {
-	url := fmt.Sprintf("%sv1/tags?offset=%d&limit=%d", dest.Url, offset, limit)
+func (dst *Ctd) APIGetTags(ctx context.Context, offset, limit int) (*TagsResponse, error) {
+	url := fmt.Sprintf("%sv1/tags?offset=%d&limit=%d", dst.Url, offset, limit)
 
 	response := TagsResponse{}
-	_, err := dest.doRequest(ctx, "GET", url, nil, &response)
+	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dest.Errorf(ctx, "Failed to get tags: %v", err)
+		dst.Errorf(ctx, "Failed to get tags: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -68,12 +68,12 @@ func (dest *Ctd) APIGetTags(ctx context.Context, offset, limit int) (*TagsRespon
 // Returns:
 //   - A pointer to a TagResponse struct containing the tag data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) APIGetTag(ctx context.Context, id int64) (*TagResponse, error) {
-	url := fmt.Sprintf("%sv1/tags/%d", dest.Url, id)
+func (dst *Ctd) APIGetTag(ctx context.Context, id int64) (*TagResponse, error) {
+	url := fmt.Sprintf("%sv1/tags/%d", dst.Url, id)
 	response := TagResponse{}
-	_, err := dest.doRequest(ctx, "GET", url, nil, &response)
+	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dest.Errorf(ctx, "Failed to get tag: %v", err)
+		dst.Errorf(ctx, "Failed to get tag: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -87,31 +87,31 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int64) (*TagResponse, error) 
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_ids: A slice of tag IDs to be assigned.
+//   - tagIDs: A slice of tag IDs to be assigned.
 //   - mode: The mode of assignment ('client' or 'request').
 //   - id: The ID of the client or request to which the tags will be assigned.
 //
 // Returns:
 //   - A pointer to a BasicResponse struct containing the response data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) APIAssignTag(ctx context.Context, tag_ids []int64, mode string, id int64) (*BasicResponse, error) {
-	if len(tag_ids) == 0 {
+func (dst *Ctd) APIAssignTag(ctx context.Context, tagIDs []int64, mode string, id int64) (*BasicResponse, error) {
+	if len(tagIDs) == 0 {
 		return nil, ErrorInvalidParameters
 	}
 
-	url := fmt.Sprintf("%sv1/tags/assign_to", dest.Url)
+	url := fmt.Sprintf("%sv1/tags/assign_to", dst.Url)
 	if mode != "client" {
 		mode = "request"
 	}
 	payload := map[string]any{
-		"tag_ids":       tag_ids,
+		"tag_ids":       tagIDs,
 		"assignee_type": mode,
 		"assignee_id":   id,
 	}
 	response := BasicResponse{}
-	data, err := dest.doRequest(ctx, "POST", url, payload, &response)
+	data, err := dst.doRequest(ctx, "POST", url, payload, &response)
 	if err != nil {
-		dest.Errorf(ctx, "Failed to assign tag: %v", err)
+		dst.Errorf(ctx, "Failed to assign tag: %v", err)
 		return nil, err
 	}
 
@@ -134,15 +134,15 @@ func (dest *Ctd) APIAssignTag(ctx context.Context, tag_ids []int64, mode string,
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_id: The ID of the tag to be removed.
+//   - tagID: The ID of the tag to be removed.
 //   - mode: The mode of removal ('client' or 'request').
 //   - id: The ID of the client or request from which the tag will be removed.
 //
 // Returns:
 //   - A pointer to a BasicResponse struct containing the response data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string, id int64) (*BasicResponse, error) {
-	url := fmt.Sprintf("%sv1/tags/%d/delete_from", dest.Url, tag_id)
+func (dst *Ctd) APIRemoveTagFrom(ctx context.Context, tagID int64, mode string, id int64) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/tags/%d/delete_from", dst.Url, tagID)
 	payload := map[string]int64{}
 	if mode == "client" {
 		payload["client_id"] = id
@@ -150,9 +150,9 @@ func (dest *Ctd) APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string
 		payload["request_id"] = id
 	}
 	response := BasicResponse{}
-	data, err := dest.doRequest(ctx, "DELETE", url, payload, &response)
+	data, err := dst.doRequest(ctx, "DELETE", url, payload, &response)
 	if err != nil {
-		dest.Errorf(ctx, "Failed to remove tag: %v", err)
+		dst.Errorf(ctx, "Failed to remove tag: %v", err)
 		return nil, err
 	}
 
@@ -185,7 +185,7 @@ func (dest *Ctd) APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string
 //   - A slice of Tag, which contains the tags
 //   - The total number of tags available.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, error) {
+func (dst *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, error) {
 	if offset < 0 {
 		offset = 0
 	}
@@ -195,13 +195,13 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, er
 	if limit > 200 {
 		limit = 200 // Maximum limit enforced by the API
 	}
-	response, err := dest.APIGetTags(ctx, offset, limit)
+	response, err := dst.APIGetTags(ctx, offset, limit)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	if response.Status != "success" {
-		dest.Errorf(ctx, "Failed to get tags: %v", response.Errors)
+		dst.Errorf(ctx, "Failed to get tags: %v", response.Errors)
 		return nil, 0, ErrorInvalidResponse
 	}
 
@@ -220,8 +220,8 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, er
 // Returns:
 //   - A pointer to a Tag, which contains the tag data
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetTag(ctx context.Context, id int64) (*Tag, error) {
-	response, err := dest.APIGetTag(ctx, id)
+func (dst *Ctd) GetTag(ctx context.Context, id int64) (*Tag, error) {
+	response, err := dst.APIGetTag(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -247,13 +247,13 @@ func (dest *Ctd) GetTag(ctx context.Context, id int64) (*Tag, error) {
 // Returns:
 //   - A slice of Tag, which contains all the tags.
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) GetAllTags(ctx context.Context) ([]Tag, error) {
+func (dst *Ctd) GetAllTags(ctx context.Context) ([]Tag, error) {
 	var tags []Tag
 	offset := 0
 	limit := 200
 
 	for {
-		response, total, err := dest.GetTags(ctx, offset, limit)
+		response, total, err := dst.GetTags(ctx, offset, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -279,13 +279,13 @@ func (dest *Ctd) GetAllTags(ctx context.Context) ([]Tag, error) {
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_ids: A slice of tag IDs to be assigned.
+//   - tagIDs: A slice of tag IDs to be assigned.
 //   - id: The ID of the request to which the tags will be assigned.
 //
 // Returns:
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) AddTagToRequest(ctx context.Context, tag_ids []int64, id int64) error {
-	response, err := dest.APIAssignTag(ctx, tag_ids, "request", id)
+func (dst *Ctd) AddTagToRequest(ctx context.Context, tagIDs []int64, id int64) error {
+	response, err := dst.APIAssignTag(ctx, tagIDs, "request", id)
 	if err != nil {
 		return err
 	}
@@ -304,13 +304,13 @@ func (dest *Ctd) AddTagToRequest(ctx context.Context, tag_ids []int64, id int64)
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_ids: A slice of tag IDs to be assigned.
+//   - tagIDs: A slice of tag IDs to be assigned.
 //   - id: The ID of the client to which the tags will be assigned.
 //
 // Returns:
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) AddTagToClient(ctx context.Context, tag_ids []int64, id int64) error {
-	response, err := dest.APIAssignTag(ctx, tag_ids, "client", id)
+func (dst *Ctd) AddTagToClient(ctx context.Context, tagIDs []int64, id int64) error {
+	response, err := dst.APIAssignTag(ctx, tagIDs, "client", id)
 	if err != nil {
 		return err
 	}
@@ -329,13 +329,13 @@ func (dest *Ctd) AddTagToClient(ctx context.Context, tag_ids []int64, id int64) 
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_id: The ID of the tag to be removed.
+//   - tagID: The ID of the tag to be removed.
 //   - id: The ID of the request from which the tag will be removed.
 //
 // Returns:
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) RemoveTagFromRequest(ctx context.Context, tag_id int64, id int64) error {
-	response, err := dest.APIRemoveTagFrom(ctx, tag_id, "request", id)
+func (dst *Ctd) RemoveTagFromRequest(ctx context.Context, tagID int64, id int64) error {
+	response, err := dst.APIRemoveTagFrom(ctx, tagID, "request", id)
 	if err != nil {
 		return err
 	}
@@ -354,13 +354,13 @@ func (dest *Ctd) RemoveTagFromRequest(ctx context.Context, tag_id int64, id int6
 //
 // Parameters:
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
-//   - tag_id: The ID of the tag to be removed.
+//   - tagID: The ID of the tag to be removed.
 //   - id: The ID of the client from which the tag will be removed.
 //
 // Returns:
 //   - An error if the request fails or if the response is invalid.
-func (dest *Ctd) RemoveTagFromClient(ctx context.Context, tag_id int64, id int64) error {
-	response, err := dest.APIRemoveTagFrom(ctx, tag_id, "client", id)
+func (dst *Ctd) RemoveTagFromClient(ctx context.Context, tagID int64, id int64) error {
+	response, err := dst.APIRemoveTagFrom(ctx, tagID, "client", id)
 	if err != nil {
 		return err
 	}

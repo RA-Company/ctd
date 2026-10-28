@@ -23,7 +23,7 @@ URL and authentication token.
 
 Parameters:
   - url: The base URL of the Chat2Desk API, which should end with a slash.
-  - token: The authentication token for the Chat2Desk API, used
+  - token: The authentication token for the Chat2Desk API, used in the Authorization header.
 </details>
 
 ```func (*Ctd).Get(ctx context.Context, path string, response any) ([]byte, error)```
@@ -143,6 +143,20 @@ Returns:
 
 </details>
 
+## Options
+
+Fields of `Ctd` that can be set after `Init`:
+
+| Field | Default | Description |
+|---|---|---|
+| `Timeout` | `10` | Request timeout in seconds. |
+| `Retry` | `false` | Repeat a request once if it times out. Be careful: a request that reached the server may be executed twice (e.g. a message may be sent twice). A request is never repeated after the context is done. |
+
+## Error fields of responses
+
+The `Errors` field of the responses has the `APIErrors` type. The API returns it as a string, an object, an array or `null`,
+so it is kept as text: strings are unquoted, anything else is kept as raw JSON. Use `Errors.String()` to get the text.
+
 ## Channels
 
 <details>
@@ -247,7 +261,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).APICreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*ClientResponse, error)```
+```func (*Ctd).APICreateClient(ctx context.Context, phone string, transport string, channelID int, nickname string, assignedPhone string) (*ClientResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -264,9 +278,9 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
   - phone: The phone number of the client to be created.
   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
-  - channel_id: The ID of the channel associated with the client.
+  - channelID: The ID of the channel associated with the client.
   - nickname: The nickname of the client (optional).
-  - assigned_phone: The assigned phone number for the client (optional).
+  - assignedPhone: The assigned phone number for the client (optional).
 
 Returns:
   - A pointer to a ClientsResponse struct containing the new client data.
@@ -314,7 +328,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).CreateClient(ctx context.Context, phone string, transport string, channel_id int, nickname string, assigned_phone string) (*Client, error)```
+```func (*Ctd).CreateClient(ctx context.Context, phone string, transport string, channelID int, nickname string, assignedPhone string) (*Client, error)```
 
 <details>
 <summary>Function description</summary>
@@ -329,9 +343,9 @@ Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
   - phone: The phone number of the client to be created.
   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
-  - channel_id: The ID of the channel to which the client belongs.
+  - channelID: The ID of the channel to which the client belongs.
   - nickname: The nickname of the client (optional).
-  - assigned_phone: The phone number assigned to the client (optional).
+  - assignedPhone: The phone number assigned to the client (optional).
 
 Returns:
   - A pointer to a Client struct containing the client details.
@@ -449,7 +463,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).APIGetDialog(ctx context.Context, dialog_id int64) (*DialogResponse, error)```
+```func (*Ctd).APIGetDialog(ctx context.Context, dialogID int64) (*DialogResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -459,14 +473,14 @@ It takes a context and a dialog ID, and returns a DialogResponse or an error.
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - dialog_id (int64): The ID of the dialog to retrieve.
+  - dialogID (int64): The ID of the dialog to retrieve.
 
 Returns:
   - A pointer to a DialogResponse containing the response data.
   - An error if the request fails.
 </details>
 
-```func (*Ctd).APICloseDialog(ctx context.Context, dialog_id int64, opertor_id int64, initiator_id int64) (*BasicResponse, error)```
+```func (*Ctd).APICloseDialog(ctx context.Context, dialogID int64, operatorID int64, initiatorID int64) (*BasicResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -476,9 +490,9 @@ It takes a context, dialog ID, operator ID, and initiator ID, and returns a Basi
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - dialog_id (int64): The ID of the dialog to close.
-  - opertor_id (int64): The ID of the operator closing the dialog.
-  - initiator_id (int64): The ID of the initiator (optional).
+  - dialogID (int64): The ID of the dialog to close.
+  - operatorID (int64): The ID of the operator closing the dialog.
+  - initiatorID (int64): The ID of the initiator (optional).
 
 Returns:
   - A pointer to a BasicResponse containing the response data.
@@ -503,7 +517,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error)```
+```func (*Ctd).GetDialog(ctx context.Context, dialogID int64) (*Dialog, error)```
 
 <details>
 <summary>Function description</summary>
@@ -513,14 +527,14 @@ It takes a context and a dialog ID, and returns a Dialog or an error.
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - dialog_id (int64): The ID of the dialog to retrieve.
+  - dialogID (int64): The ID of the dialog to retrieve.
 
 Returns:
   - A pointer to a Dialog containing the dialog data.
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).CloseDialog(ctx context.Context, dialog_id int64, opertor_id int64, initiator_id int64) error```
+```func (*Ctd).CloseDialog(ctx context.Context, dialogID int64, operatorID int64, initiatorID int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -530,12 +544,45 @@ It takes a context, dialog ID, operator ID, and initiator ID, and returns an err
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - dialog_id (int64): The ID of the dialog to close.
-  - opertor_id (int64): The ID of the operator closing the dialog.
-  - initiator_id (int64): The ID of the initiator (optional).
+  - dialogID (int64): The ID of the dialog to close.
+  - operatorID (int64): The ID of the operator closing the dialog.
+  - initiatorID (int64): The ID of the initiator (optional).
 
 Returns:
   - An error if the request fails or if the response is invalid.
+</details>
+
+</details>
+
+## Login
+
+<details>
+<summary>Functions list</summary>
+
+```func (*Ctd).Login(ctx context.Context, login, password, personalLogin, personalPassword, otp, captcha string) (LoginResult, error)```
+
+<details>
+<summary>Function description</summary>
+
+Login signs in to Chat2Desk. If personalLogin and personalPassword are set, the master login is used.
+
+Returns:
+  - LoginResult with AuthKey on success.
+  - LoginResult with RetryDelay (seconds to wait before the next attempt) when ErrorTooFast is returned.
+  - LoginResult with Error (the raw response body) when ErrorUnknownError is returned.
+  - An error if the login fails: ErrorInvalidLoginOrPassword, ErrorUserNotFound, ErrorAccountIsBlocked,
+    ErrorMasterPasswordRequired, ErrorMasterNotAllowed, ErrorOTPRequired, ErrorCaptchaRequired,
+    ErrorPasswordHasExpired, ErrorTooFast, ErrorInvalidResponse or ErrorUnknownError.
+
+The response body is written to the debug log only if the login failed.
+
+```go
+type LoginResult struct {
+    AuthKey    string // authorization key, set on successful login
+    RetryDelay int    // seconds to wait before the next attempt, set together with ErrorTooFast
+    Error      string // raw response body, set together with ErrorUnknownError
+}
+```
 </details>
 
 </details>
@@ -562,7 +609,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).APITransferToGroup(ctx context.Context, message_id int64, group_id int64, force bool) (*BasicResponse, error)```
+```func (*Ctd).APITransferToGroup(ctx context.Context, messageID int64, groupID int64, force bool) (*BasicResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -572,8 +619,8 @@ It takes a context, message ID, group ID, and force flag, and returns an error i
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - message_id (int64): The ID of the message to transfer.
-  - group_id (int64): The ID of the group to transfer the message to.
+  - messageID (int64): The ID of the message to transfer.
+  - groupID (int64): The ID of the group to transfer the message to.
   - force (bool): Whether to force the transfer.
 
 Returns:
@@ -581,7 +628,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).APITransferToOperator(ctx context.Context, message_id int64, operator_id int64) (*BasicResponse, error)```
+```func (*Ctd).APITransferToOperator(ctx context.Context, messageID int64, operatorID int64) (*BasicResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -591,8 +638,8 @@ It takes a context, message ID, and operator ID, and returns an error if the req
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - message_id (int64): The ID of the message to transfer.
-  - operator_id (int64): The ID of the operator to transfer the message to.
+  - messageID (int64): The ID of the message to transfer.
+  - operatorID (int64): The ID of the operator to transfer the message to.
 
 Returns:
   - A pointer to a BasicResponse containing the response data.
@@ -616,7 +663,7 @@ Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).TransferToGroup(ctx context.Context, message_id int64, group_id int64, force bool) error```
+```func (*Ctd).TransferToGroup(ctx context.Context, messageID int64, groupID int64, force bool) error```
 
 <details>
 <summary>Function description</summary>
@@ -626,15 +673,15 @@ It takes a context, message ID, group ID, and force flag, and returns an error i
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - message_id (int64): The ID of the message to transfer.
-  - group_id (int64): The ID of the group to transfer the message to.
+  - messageID (int64): The ID of the message to transfer.
+  - groupID (int64): The ID of the group to transfer the message to.
   - force (bool): Whether to force the transfer.
 
 Returns:
   - An error if the request fails.
 </details>
 
-```func (*Ctd).TransferToOperator(ctx context.Context, message_id int64, operator_id int64) error```
+```func (*Ctd).TransferToOperator(ctx context.Context, messageID int64, operatorID int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -644,8 +691,8 @@ It takes a context, message ID, and operator ID, and returns an error if the req
 
 Parameters:
   - ctx (context.Context): The context for the request.
-  - message_id (int64): The ID of the message to transfer.
-  - operator_id (int64): The ID of the operator to transfer the message to.
+  - messageID (int64): The ID of the message to transfer.
+  - operatorID (int64): The ID of the operator to transfer the message to.
 
 Returns:
   - An error if the request fails.
@@ -926,7 +973,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).APIAssignTag(ctx context.Context, tag_ids []int64, mode string, id int64) (*BasicResponse, error)```
+```func (*Ctd).APIAssignTag(ctx context.Context, tagIDs []int64, mode string, id int64) (*BasicResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -939,7 +986,7 @@ If the request is successful, it returns a pointer to the BasicResponse struct.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_ids: A slice of tag IDs to be assigned.
+  - tagIDs: A slice of tag IDs to be assigned.
   - mode: The mode of assignment ('client' or 'request').
   - id: The ID of the client or request to which the tags will be assigned.
 
@@ -948,7 +995,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string, id int64) (*BasicResponse, error)```
+```func (*Ctd).APIRemoveTagFrom(ctx context.Context, tagID int64, mode string, id int64) (*BasicResponse, error)```
 
 <details>
 <summary>Function description</summary>
@@ -961,7 +1008,7 @@ If the request is successful, it returns a pointer to the BasicResponse struct.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_id: The ID of the tag to be removed.
+  - tagID: The ID of the tag to be removed.
   - mode: The mode of removal ('client' or 'request').
   - id: The ID of the client or request from which the tag will be removed.
 
@@ -1027,7 +1074,7 @@ Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).AddTagToRequest(ctx context.Context, tag_ids []int64, id int64) error```
+```func (*Ctd).AddTagToRequest(ctx context.Context, tagIDs []int64, id int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -1039,14 +1086,14 @@ It returns nil if the tags are successfully assigned.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_ids: A slice of tag IDs to be assigned.
+  - tagIDs: A slice of tag IDs to be assigned.
   - id: The ID of the request to which the tags will be assigned.
 
 Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).AddTagToClient(ctx context.Context, tag_ids []int64, id int64) error```
+```func (*Ctd).AddTagToClient(ctx context.Context, tagIDs []int64, id int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -1058,14 +1105,14 @@ It returns nil if the tags are successfully assigned.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_ids: A slice of tag IDs to be assigned.
+  - tagIDs: A slice of tag IDs to be assigned.
   - id: The ID of the client to which the tags will be assigned.
 
 Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).RemoveTagFromRequest(ctx context.Context, tag_id int64, id int64) error```
+```func (*Ctd).RemoveTagFromRequest(ctx context.Context, tagID int64, id int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -1077,14 +1124,14 @@ It returns nil if the tag is successfully removed.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_id: The ID of the tag to be removed.
+  - tagID: The ID of the tag to be removed.
   - id: The ID of the request from which the tag will be removed.
 
 Returns:
   - An error if the request fails or if the response is invalid.
 </details>
 
-```func (*Ctd).RemoveTagFromClient(ctx context.Context, tag_id int64, id int64) error```
+```func (*Ctd).RemoveTagFromClient(ctx context.Context, tagID int64, id int64) error```
 
 <details>
 <summary>Function description</summary>
@@ -1096,7 +1143,7 @@ It returns nil if the tag is successfully removed.
 
 Parameters:
   - ctx: The context for the request, allowing for cancellation and timeouts.
-  - tag_id: The ID of the tag to be removed.
+  - tagID: The ID of the tag to be removed.
   - id: The ID of the client from which the tag will be removed.
 
 Returns:

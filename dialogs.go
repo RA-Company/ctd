@@ -94,13 +94,13 @@ func (dst *Ctd) APIGetDialogs(ctx context.Context, params *GetDialogsParams) (*D
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
-//   - dialog_id (int64): The ID of the dialog to retrieve.
+//   - dialogID (int64): The ID of the dialog to retrieve.
 //
 // Returns:
 //   - A pointer to a DialogResponse containing the response data.
 //   - An error if the request fails.
-func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogResponse, error) {
-	url := fmt.Sprintf("%sv1/dialogs/%d", dst.Url, dialog_id)
+func (dst *Ctd) APIGetDialog(ctx context.Context, dialogID int64) (*DialogResponse, error) {
+	url := fmt.Sprintf("%sv1/dialogs/%d", dst.Url, dialogID)
 	response := DialogResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
@@ -115,21 +115,21 @@ func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogRespo
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
-//   - dialog_id (int64): The ID of the dialog to close.
-//   - opertor_id (int64): The ID of the operator closing the dialog.
-//   - initiator_id (int64): The ID of the initiator (optional).
+//   - dialogID (int64): The ID of the dialog to close.
+//   - operatorID (int64): The ID of the operator closing the dialog.
+//   - initiatorID (int64): The ID of the initiator (optional).
 //
 // Returns:
 //   - A pointer to a BasicResponse containing the response data.
 //   - An error if the request fails.
-func (dst *Ctd) APICloseDialog(ctx context.Context, dialog_id, opertor_id, initiator_id int64) (*BasicResponse, error) {
-	url := fmt.Sprintf("%sv1/dialogs/%d", dst.Url, dialog_id)
-	payload := map[string]interface{}{
-		"operator_id": opertor_id,
+func (dst *Ctd) APICloseDialog(ctx context.Context, dialogID, operatorID, initiatorID int64) (*BasicResponse, error) {
+	url := fmt.Sprintf("%sv1/dialogs/%d", dst.Url, dialogID)
+	payload := map[string]any{
+		"operator_id": operatorID,
 		"state":       "closed",
 	}
-	if initiator_id > 0 {
-		payload["initiator_id"] = initiator_id
+	if initiatorID > 0 {
+		payload["initiator_id"] = initiatorID
 	}
 	response := BasicResponse{}
 
@@ -170,13 +170,13 @@ func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dia
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
-//   - dialog_id (int64): The ID of the dialog to retrieve.
+//   - dialogID (int64): The ID of the dialog to retrieve.
 //
 // Returns:
 //   - A pointer to a Dialog containing the dialog data.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error) {
-	data, err := dst.APIGetDialog(ctx, dialog_id)
+func (dst *Ctd) GetDialog(ctx context.Context, dialogID int64) (*Dialog, error) {
+	data, err := dst.APIGetDialog(ctx, dialogID)
 	if err != nil {
 		return nil, err
 	}
@@ -197,14 +197,14 @@ func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error)
 //
 // Parameters:
 //   - ctx (context.Context): The context for the request.
-//   - dialog_id (int64): The ID of the dialog to close.
-//   - opertor_id (int64): The ID of the operator closing the dialog.
-//   - initiator_id (int64): The ID of the initiator (optional).
+//   - dialogID (int64): The ID of the dialog to close.
+//   - operatorID (int64): The ID of the operator closing the dialog.
+//   - initiatorID (int64): The ID of the initiator (optional).
 //
 // Returns:
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) CloseDialog(ctx context.Context, dialog_id, opertor_id, initiator_id int64) error {
-	data, err := dst.APICloseDialog(ctx, dialog_id, opertor_id, initiator_id)
+func (dst *Ctd) CloseDialog(ctx context.Context, dialogID, operatorID, initiatorID int64) error {
+	data, err := dst.APICloseDialog(ctx, dialogID, operatorID, initiatorID)
 	if err != nil {
 		return err
 	}

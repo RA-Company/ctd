@@ -17,14 +17,21 @@ func TestCtd_Messages(t *testing.T) {
 	url, token := getCredentials(t)
 
 	clientID := int64(env.GetEnvInt("API_CLIENT_ID", 0))
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file and .settings")
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file and .settings, skipping the test")
+	}
 	transport := env.GetEnvStr("API_MESSAGE_TRANSPORT", "")
-	require.NotEmpty(t, transport, "API_MESSAGE_TRANSPORT must be set in .env file and .settings")
+	if transport == "" {
+		t.Skip("API_MESSAGE_TRANSPORT must be set in .env file and .settings, skipping the test")
+	}
 	channelID := int64(env.GetEnvInt("API_CHANNEL_ID", 0))
-	require.NotEqual(t, 0, channelID, "API_CHANNEL_ID must be set in .env file and .settings")
+	if channelID == 0 {
+		t.Skip("API_CHANNEL_ID must be set in .env file and .settings, skipping the test")
+	}
 	messageURL := env.GetEnvStr("API_MESSAGE_URL", "")
-	require.NotEmpty(t, messageURL, "API_MESSAGE_URL must be set in .env file and .settings")
-
+	if messageURL == "" {
+		t.Skip("API_MESSAGE_URL must be set in .env file and .settings, skipping the test")
+	}
 	tests := []struct {
 		name    string
 		token   string
@@ -152,16 +159,25 @@ func TestCtd_MessagesTransferToGroup(t *testing.T) {
 	url, token := getCredentials(t)
 
 	clientID := int64(env.GetEnvInt("API_CLIENT_ID", 0))
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file and .settings")
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file and .settings, skipping the test")
+	}
 	transport := env.GetEnvStr("API_MESSAGE_TRANSPORT", "")
-	require.NotEmpty(t, transport, "API_MESSAGE_TRANSPORT must be set in .env file and .settings")
+	if transport == "" {
+		t.Skip("API_MESSAGE_TRANSPORT must be set in .env file and .settings, skipping the test")
+	}
 	channelID := int64(env.GetEnvInt("API_CHANNEL_ID", 0))
-	require.NotEqual(t, 0, channelID, "API_CHANNEL_ID must be set in .env file and .settings")
+	if channelID == 0 {
+		t.Skip("API_CHANNEL_ID must be set in .env file and .settings, skipping the test")
+	}
 	operatorID := int64(env.GetEnvInt("API_OPERATOR_ID", 0))
-	require.NotEqual(t, 0, operatorID, "API_OPERATOR_ID must be set in .env file and .settings")
+	if operatorID == 0 {
+		t.Skip("API_OPERATOR_ID must be set in .env file and .settings, skipping the test")
+	}
 	groupID := int64(env.GetEnvInt("API_GROUP_ID", 0))
-	require.NotEqual(t, 0, groupID, "API_GROUP_ID must be set in .env file and .settings")
-
+	if groupID == 0 {
+		t.Skip("API_GROUP_ID must be set in .env file and .settings, skipping the test")
+	}
 	service := Ctd{}
 	service.Init(url, token)
 
@@ -207,7 +223,7 @@ func TestCtd_MessagesTransferToGroup(t *testing.T) {
 		dst := &Ctd{}
 		dst.Init(url, token)
 		err := dst.TransferToGroup(ctx, 0, groupID, false)
-		require.ErrorIs(t, err, ErrorInvalidMesssageID, "dst.TransferDialogToGroup() error")
+		require.ErrorIs(t, err, ErrorInvalidMessageID, "dst.TransferDialogToGroup() error")
 	})
 }
 
@@ -218,16 +234,25 @@ func TestCtd_MessagesTransferToOperator(t *testing.T) {
 	url, token := getCredentials(t)
 
 	clientID := int64(env.GetEnvInt("API_CLIENT_ID", 0))
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file and .settings")
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file and .settings, skipping the test")
+	}
 	transport := env.GetEnvStr("API_MESSAGE_TRANSPORT", "")
-	require.NotEmpty(t, transport, "API_MESSAGE_TRANSPORT must be set in .env file and .settings")
+	if transport == "" {
+		t.Skip("API_MESSAGE_TRANSPORT must be set in .env file and .settings, skipping the test")
+	}
 	channelID := int64(env.GetEnvInt("API_CHANNEL_ID", 0))
-	require.NotEqual(t, 0, channelID, "API_CHANNEL_ID must be set in .env file and .settings")
+	if channelID == 0 {
+		t.Skip("API_CHANNEL_ID must be set in .env file and .settings, skipping the test")
+	}
 	operatorID := int64(env.GetEnvInt("API_OPERATOR_ID", 0))
-	require.NotEqual(t, 0, operatorID, "API_OPERATOR_ID must be set in .env file and .settings")
+	if operatorID == 0 {
+		t.Skip("API_OPERATOR_ID must be set in .env file and .settings, skipping the test")
+	}
 	groupID := int64(env.GetEnvInt("API_GROUP_ID", 0))
-	require.NotEqual(t, 0, groupID, "API_GROUP_ID must be set in .env file and .settings")
-
+	if groupID == 0 {
+		t.Skip("API_GROUP_ID must be set in .env file and .settings, skipping the test")
+	}
 	service := Ctd{}
 	service.Init(url, token)
 
@@ -276,6 +301,6 @@ func TestCtd_MessagesTransferToOperator(t *testing.T) {
 		dst := &Ctd{}
 		dst.Init(url, token)
 		err := dst.TransferToOperator(ctx, 0, operatorID)
-		require.ErrorIs(t, err, ErrorInvalidMesssageID, "dst.TransferToOperator() error")
+		require.ErrorIs(t, err, ErrorInvalidMessageID, "dst.TransferToOperator() error")
 	})
 }

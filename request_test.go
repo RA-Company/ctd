@@ -12,8 +12,9 @@ func TestCtd_RequestMessages(t *testing.T) {
 	url, token := getCredentials(t)
 
 	requestID := env.GetEnvInt("API_REQUEST_ID", 0)
-	require.NotEqual(t, 0, requestID, "API_REQUEST_ID must be set in .env file or .settings")
-
+	if requestID == 0 {
+		t.Skip("API_REQUEST_ID must be set in .env file or .settings, skipping the test")
+	}
 	tests := []struct {
 		name     string
 		token    string

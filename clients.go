@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-
-	"github.com/ra-company/logging"
 )
 
 // ClientResponse represents the response structure for client-related API calls.
@@ -47,8 +45,8 @@ type Client struct {
 	ExtraComment3         string                     `json:"extra_comment_3"`      // ExtraComment3: Third extra comment associated with the client
 	CustomFields          map[string]json.RawMessage `json:"custom_fields"`        // CustomFields: Map of custom fields associated with the client
 	ClientExternalID      string                     `json:"client_external_id"`   // ClientExternalID: External ID of the client
-	ExtrnalID             string                     `json:"external_id"`          // ExternalID: External ID of the client (the API returns either a string or a number)
-	ExtrnalIDs            map[string]string          `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client (the API returns each value either as a string or as a number)
+	ExternalID            string                     `json:"external_id"`          // ExternalID: External ID of the client (the API returns either a string or a number)
+	ExternalIDs           map[string]string          `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client (the API returns each value either as a string or as a number)
 	Channels              []Channel                  `json:"channels"`             // Channels: List of channels associated with the client
 	Tags                  []Tag                      `json:"tags"`                 // Tags: List of tags associated with the client
 }
@@ -59,8 +57,8 @@ func (dst *Client) UnmarshalJSON(data []byte) error {
 	type plain Client
 	aux := struct {
 		*plain
-		ExtrnalID  json.RawMessage            `json:"external_id"`
-		ExtrnalIDs map[string]json.RawMessage `json:"external_ids"`
+		ExternalID  json.RawMessage            `json:"external_id"`
+		ExternalIDs map[string]json.RawMessage `json:"external_ids"`
 	}{plain: (*plain)(dst)}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
@@ -68,15 +66,15 @@ func (dst *Client) UnmarshalJSON(data []byte) error {
 	}
 
 	var err error
-	if dst.ExtrnalID, err = externalIDString(aux.ExtrnalID); err != nil {
+	if dst.ExternalID, err = externalIDString(aux.ExternalID); err != nil {
 		return err
 	}
 
-	dst.ExtrnalIDs = nil
-	if aux.ExtrnalIDs != nil {
-		dst.ExtrnalIDs = make(map[string]string, len(aux.ExtrnalIDs))
-		for key, raw := range aux.ExtrnalIDs {
-			if dst.ExtrnalIDs[key], err = externalIDString(raw); err != nil {
+	dst.ExternalIDs = nil
+	if aux.ExternalIDs != nil {
+		dst.ExternalIDs = make(map[string]string, len(aux.ExternalIDs))
+		for key, raw := range aux.ExternalIDs {
+			if dst.ExternalIDs[key], err = externalIDString(raw); err != nil {
 				return err
 			}
 		}
@@ -183,25 +181,25 @@ func (dst *Ctd) APIGetClients(ctx context.Context, offset, limit int, order, par
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - phone: The phone number of the client to be created.
 //   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
-//   - channel_id: The ID of the channel associated with the client.
+//   - channelID: The ID of the channel associated with the client.
 //   - nickname: The nickname of the client (optional).
-//   - assigned_phone: The assigned phone number for the client (optional).
+//   - assignedPhone: The assigned phone number for the client (optional).
 //
 // Returns:
 //   - A pointer to a ClientsResponse struct containing the new client data.
 //   - An error if the request fails or if the response is invalid.
-func (dst *Ctd) APICreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*ClientResponse, error) {
+func (dst *Ctd) APICreateClient(ctx context.Context, phone, transport string, channelID int, nickname, assignedPhone string) (*ClientResponse, error) {
 	url := fmt.Sprintf("%sv1/clients", dst.Url)
 	data := map[string]any{
 		"phone":      phone,
 		"transport":  transport,
-		"channel_id": channel_id,
+		"channel_id": channelID,
 	}
 	if nickname != "" {
 		data["nickname"] = nickname
 	}
-	if assigned_phone != "" {
-		data["assigned_phone"] = assigned_phone
+	if assignedPhone != "" {
+		data["assigned_phone"] = assignedPhone
 	}
 
 	response := ClientResponse{}
@@ -285,15 +283,15 @@ func (dst *Ctd) GetClientsList(ctx context.Context, offset, limit int) ([]Client
 //   - ctx: The context for the request, allowing for cancellation and timeouts.
 //   - phone: The phone number of the client to be created.
 //   - transport: The transport type for the client (e.g., "whatsapp", "telegram").
-//   - channel_id: The ID of the channel to which the client belongs.
+//   - channelID: The ID of the channel to which the client belongs.
 //   - nickname: The nickname of the client (optional).
-//   - assigned_phone: The phone number assigned to the client (optional).
+//   - assignedPhone: The phone number assigned to the client (optional).
 //
 // Returns:
 //   - A pointer to a Client struct containing the client details.
 //   - An error if the request fails, if the response is invalid, or if the client could not be created.
-func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channel_id int, nickname, assigned_phone string) (*Client, error) {
-	response, err := dst.APICreateClient(ctx, phone, transport, channel_id, nickname, assigned_phone)
+func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, channelID int, nickname, assignedPhone string) (*Client, error) {
+	response, err := dst.APICreateClient(ctx, phone, transport, channelID, nickname, assignedPhone)
 	if err != nil {
 		return nil, err
 	}
@@ -309,20 +307,20 @@ func (dst *Ctd) CreateClient(ctx context.Context, phone, transport string, chann
 			client := Client{
 				ID:           int(id),
 				Phone:        phone,
-				ClientPhone:  assigned_phone,
+				ClientPhone:  assignedPhone,
 				AssignedName: nickname,
 				Channels: []Channel{
 					{
-						ID:         channel_id,
+						ID:         channelID,
 						Transports: []string{transport},
 					},
 				},
 			}
-			return &client, ErrorClieantAlreadyExists
+			return &client, ErrorClientAlreadyExists
 		}
 	}
 
-	logging.Logs.Errorf(ctx, "Failed to create client: %s", response.Errors)
+	dst.Errorf(ctx, "Failed to create client: %s", response.Errors)
 	if strings.Contains(str, "transport") {
 		if strings.Contains(str, "incorrect") {
 			return nil, ErrorInvalidTransport

@@ -67,14 +67,21 @@ func TestCtd_Dialogs(t *testing.T) {
 	})
 
 	clientID := env.GetEnvInt("API_CLIENT_ID", 0)
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file and .settings")
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file and .settings, skipping the test")
+	}
 	transport := env.GetEnvStr("API_MESSAGE_TRANSPORT", "")
-	require.NotEmpty(t, transport, "API_MESSAGE_TRANSPORT must be set in .env file and .settings")
+	if transport == "" {
+		t.Skip("API_MESSAGE_TRANSPORT must be set in .env file and .settings, skipping the test")
+	}
 	channelID := env.GetEnvInt("API_CHANNEL_ID", 0)
-	require.NotEqual(t, 0, channelID, "API_CHANNEL_ID must be set in .env file and .settings")
+	if channelID == 0 {
+		t.Skip("API_CHANNEL_ID must be set in .env file and .settings, skipping the test")
+	}
 	operatorID := env.GetEnvInt("API_OPERATOR_ID", 0)
-	require.NotEqual(t, 0, operatorID, "API_OPERATOR_ID must be set in .env file and .settings")
-
+	if operatorID == 0 {
+		t.Skip("API_OPERATOR_ID must be set in .env file and .settings, skipping the test")
+	}
 	t.Run("05 CloseDialog Incorrect token", func(t *testing.T) {
 		dst := &Ctd{}
 		dst.Init(url, "incorrect_token")

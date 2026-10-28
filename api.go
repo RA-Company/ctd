@@ -29,9 +29,9 @@ var (
 	ErrorInvalidChannelID        = fmt.Errorf("invalid channel ID")
 	ErrorInvalidOperatorGroupID  = fmt.Errorf("invalid operator group ID")
 	ErrorInvalidOperatorID       = fmt.Errorf("invalid operator ID")
-	ErrorInvalidMesssageID       = fmt.Errorf("invalid message ID")
+	ErrorInvalidMessageID        = fmt.Errorf("invalid message ID")
 	ErrorInvalidTransport        = fmt.Errorf("invalid transport")
-	ErrorClieantAlreadyExists    = fmt.Errorf("client already exists")
+	ErrorClientAlreadyExists     = fmt.Errorf("client already exists")
 )
 
 // MetaResponse provides metadata about the response,

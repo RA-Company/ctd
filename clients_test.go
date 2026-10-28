@@ -18,8 +18,9 @@ func TestCtd_Clients(t *testing.T) {
 	url, token := getCredentials(t)
 
 	clientID := env.GetEnvInt("API_CLIENT_ID", 0)
-	require.NotEqual(t, 0, clientID, "API_CLIENT_ID must be set in .env file or .settings")
-
+	if clientID == 0 {
+		t.Skip("API_CLIENT_ID must be set in .env file or .settings, skipping the test")
+	}
 	tests := []struct {
 		name      string
 		token     string
@@ -207,7 +208,7 @@ func TestCtd_CreateClient_Email(t *testing.T) {
 
 		t.Run("Create existing client with email", func(t *testing.T) {
 			again, err := service.CreateClient(ctx, email, transport, channel, nickname, "")
-			require.ErrorIs(t, err, ErrorClieantAlreadyExists, "service.CreateClient() should return ErrorClieantAlreadyExists error")
+			require.ErrorIs(t, err, ErrorClientAlreadyExists, "service.CreateClient() should return ErrorClientAlreadyExists error")
 			require.NotNil(t, again, "service.CreateClient() should return data")
 			require.Equal(t, got.ID, again.ID, "service.CreateClient() should return the ID of the existing client")
 		})
@@ -244,7 +245,7 @@ func TestCtd_CreateClient(t *testing.T) {
 
 	t.Run("Create existing client", func(t *testing.T) {
 		got, err := service.CreateClient(ctx, phone, transport, channel, faker.Name(), phone)
-		require.ErrorIs(t, err, ErrorClieantAlreadyExists, "service.CreateClient() should return ErrorClieantAlreadyExists error")
+		require.ErrorIs(t, err, ErrorClientAlreadyExists, "service.CreateClient() should return ErrorClientAlreadyExists error")
 		require.NotNil(t, got, "service.CreateClient() should return data")
 		require.Equal(t, phone, got.Phone, "service.CreateClient() should return client with correct phone")
 		require.Equal(t, id, got.ID, "service.CreateClient() should return client with correct ID")

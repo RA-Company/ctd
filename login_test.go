@@ -11,14 +11,17 @@ func TestCtd_Login(t *testing.T) {
 	ctx := t.Context()
 
 	login := os.Getenv("TEST_CTD_LOGIN")
-	require.NotEqual(t, "", login, "Environment variable TEST_CTD_LOGIN isn't set")
-
+	if login == "" {
+		t.Skip("Environment variable TEST_CTD_LOGIN isn't set, skipping the test")
+	}
 	url := os.Getenv("TEST_WEB_URL")
-	require.NotEqual(t, "", url, "Environment variable TEST_WEB_URL isn't set")
-
+	if url == "" {
+		t.Skip("Environment variable TEST_WEB_URL isn't set, skipping the test")
+	}
 	pwd := os.Getenv("TEST_CTD_PWD")
-	require.NotEqual(t, "", pwd, "Environment variable TEST_CTD_PWD isn't set")
-
+	if pwd == "" {
+		t.Skip("Environment variable TEST_CTD_PWD isn't set, skipping the test")
+	}
 	ctd := Ctd{
 		Url: url,
 	}
