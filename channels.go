@@ -52,13 +52,13 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 
 	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to get channels: %v", err)
+		dst.Errorf(ctx, "Failed to get channels: %v", err)
 		return nil, err
 	}
 
 	/*err = json.Unmarshal(data, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to unmarshal channels response: %v", err)
+		dst.Errorf(ctx, "Failed to unmarshal channels response: %v", err)
 		return nil, ErrorInvalidResponse
 	}*/
 
@@ -82,12 +82,12 @@ func (dst *Ctd) Channels(ctx context.Context, offset, limit int) (*ChannelsRespo
 func (dst *Ctd) GetChannels(ctx context.Context, offset, limit int) ([]Channel, int, error) {
 	response, err := dst.Channels(ctx, offset, limit)
 	if err != nil {
-		dst.Error(ctx, "Failed to get channels: %v", err)
+		dst.Errorf(ctx, "Failed to get channels: %v", err)
 		return nil, 0, err
 	}
 
 	if response.Status != "success" {
-		dst.Error(ctx, "Invalid response status: %s", response.Status)
+		dst.Errorf(ctx, "Invalid response status: %s", response.Status)
 		return nil, 0, ErrorInvalidResponse
 	}
 

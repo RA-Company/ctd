@@ -45,7 +45,7 @@ func TestCtd_newLoginAPIParsing(t *testing.T) {
 	tests := []struct {
 		name    string
 		result  string
-		want    string
+		want    LoginResult
 		wantErr error
 	}{
 		{
@@ -62,31 +62,31 @@ func TestCtd_newLoginAPIParsing(t *testing.T) {
 				},
 				"login_attempts_info":{"max_attempts_number":5,"failed_attempts_number":1,"failed_login_attempt_date":1778381910}
 			}`,
-			want:    "",
+			want:    LoginResult{},
 			wantErr: ErrorPasswordHasExpired,
 		},
 		{
 			name:    "Incorrect OTP",
 			result:  `{"status":"error","errors":{"error":["incorrect_otp"],"status_code":[401],"otp_required":["Enter one time password"]},"login_attempts_info":{"max_attempts_number":5,"failed_attempts_number":1,"failed_login_attempt_date":1769423465}}`,
-			want:    "",
+			want:    LoginResult{},
 			wantErr: ErrorOTPRequired,
 		},
 		{
 			name:    "Successful login",
 			result:  `{"status":"success","session_code":"617.PqOCydEPe7p2fkexKSgb","auth_key":"PqOCydEPe7p2fkexKSgb.user"}`,
-			want:    "",
+			want:    LoginResult{AuthKey: "PqOCydEPe7p2fkexKSgb.user"},
 			wantErr: nil,
 		},
 		{
 			name:    "Incorrect login or password",
 			result:  `{"status":"error","errors":{"error":["incorrect_password"],"status_code":[401],"password":["Wrong login or password"]},"login_attempts_info":{"max_attempts_number":5,"failed_attempts_number":3,"failed_login_attempt_date":1769433935}}`,
-			want:    "",
+			want:    LoginResult{},
 			wantErr: ErrorInvalidLoginOrPassword,
 		},
 		{
 			name:    "User not found",
 			result:  `{"status":"error","errors":{"error":["user_does_not_exist"],"status_code":[401],"password":["Wrong login or password"]},"login_attempts_info":null}`,
-			want:    "",
+			want:    LoginResult{},
 			wantErr: ErrorUserNotFound,
 		},
 	}

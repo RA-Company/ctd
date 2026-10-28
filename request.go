@@ -2,6 +2,7 @@ package ctd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -124,15 +125,15 @@ func (dst *Ctd) APIRequestMessages(ctx context.Context, request int64) ([]Reques
 	response := []RequestMessage{}
 
 	body, err := dst.doRequest(ctx, "GET", url, nil, &response)
-	if err == ErrorInvalidResponse {
+	if errors.Is(err, ErrorInvalidResponse) {
 		if strings.Contains(string(body), "not_found") {
-			dst.Error(ctx, "Invalid request ID: %d", request)
+			dst.Errorf(ctx, "Invalid request ID: %d", request)
 			return nil, ErrorInvalidRequestID
 		}
 	}
 
 	if err != nil {
-		dst.Error(ctx, "Failed to get request messages: %v", err)
+		dst.Errorf(ctx, "Failed to get request messages: %v", err)
 		return nil, err
 	}
 

@@ -9,7 +9,7 @@ type CustomClientFieldResponse struct {
 	Status  string              `json:"status"`           // Status: Status of the response
 	Data    []CustomClientField `json:"data"`             // Data: List of custom client fields
 	Message string              `json:"message"`          // Message: Additional message from the API
-	Errors  string              `json:"errors,omitempty"` // Errors: List of errors, if any
+	Errors  APIErrors           `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // CustomClientField represents a single custom client field in the Chat2Desk API.
@@ -44,7 +44,7 @@ func (dst *Ctd) APICustomClientFields(ctx context.Context) (*CustomClientFieldRe
 	response := CustomClientFieldResponse{}
 	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to get custom client fields: %v", err)
+		dst.Errorf(ctx, "Failed to get custom client fields: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -68,7 +68,7 @@ func (dst *Ctd) GetCustomClientFields(ctx context.Context) ([]CustomClientField,
 	}
 
 	if response.Status != "ok" {
-		dst.Error(ctx, "Failed to get custom client fields: %s", response.Errors)
+		dst.Errorf(ctx, "Failed to get custom client fields: %v", response.Errors)
 		return nil, ErrorInvalidResponse
 	}
 

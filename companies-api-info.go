@@ -15,7 +15,7 @@ type CompaniesApiInfoResponse struct {
 	Status  string           `json:"status"`           // Status: Status of the response
 	Data    CompaniesApiInfo `json:"data"`             // Data: Information about the company
 	Message string           `json:"message"`          // Message: Additional message from the API
-	Errors  string           `json:"errors,omitempty"` // Errors: List of errors, if any
+	Errors  APIErrors        `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // APIGetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
@@ -39,7 +39,7 @@ func (dst *Ctd) APICompaniesApiInfo(ctx context.Context) (*CompaniesApiInfoRespo
 
 // GetCompaniesApiInfo retrieves information about the company using the Chat2Desk API.
 // It uses the APICompaniesApiInfo method to fetch the company information and handles errors.
-// If the response status is not "success", it returns nil.
+// If the response status is not "success", it returns ErrorInvalidResponse.
 // It returns a pointer to a CompaniesApiInfo struct, which contains the company information.
 //
 // Parameters:
@@ -51,7 +51,8 @@ func (dst *Ctd) CompaniesApiInfo(ctx context.Context) (*CompaniesApiInfo, error)
 	}
 
 	if data.Status != "success" {
-		return nil, nil
+		dst.Errorf(ctx, "Failed to get companies API info: %v", data.Errors)
+		return nil, ErrorInvalidResponse
 	}
 
 	return &data.Data, nil

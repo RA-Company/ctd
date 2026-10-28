@@ -120,7 +120,7 @@ func TestCtd_Clients(t *testing.T) {
 			name:  "Create client with incorrect token",
 			token: "incorrect_token",
 			client: createClient{
-				Phone:         fmt.Sprintf("%d", faker.IntRange(10000000, 20000000)),
+				Phone:         fakePhone(faker),
 				Transport:     transport,
 				ChannelID:     channel,
 				Nickname:      faker.Name(),
@@ -133,7 +133,7 @@ func TestCtd_Clients(t *testing.T) {
 			name:  "Create client with correct token",
 			token: token,
 			client: createClient{
-				Phone:         fmt.Sprintf("%d", faker.IntRange(10000000, 20000000)),
+				Phone:         fakePhone(faker),
 				Transport:     transport,
 				ChannelID:     channel,
 				Nickname:      faker.Name(),
@@ -165,6 +165,53 @@ func TestCtd_Clients(t *testing.T) {
 			}
 		})
 	}
+}
+
+// fakePhone returns a random phone number that is accepted by the API: digits only, 10-14 symbols.
+func fakePhone(faker *gofakeit.Faker) string {
+	return fmt.Sprintf("%d", faker.IntRange(100000000000, 999999999999))
+}
+
+func TestCtd_CreateClient_Email(t *testing.T) {
+	ctx := t.Context()
+	url, token := getCredentials(t)
+	faker := gofakeit.New(0)
+
+	transport := env.GetEnvStr("API_CREATE_CLIENT_EMAIL_TRANSPORT", "email")
+
+	channel := env.GetEnvInt("API_CREATE_CLIENT_EMAIL_CHANNEL_ID", 0)
+	if channel == 0 {
+		t.Skip("API_CREATE_CLIENT_EMAIL_CHANNEL_ID is not set, skipping create client with email tests")
+	}
+
+	t.Run("Create client with incorrect token", func(t *testing.T) {
+		service := &Ctd{}
+		service.Init(url, "incorrect_token")
+
+		got, err := service.CreateClient(ctx, faker.Email(), transport, channel, faker.Name(), "")
+		require.ErrorIs(t, err, ErrorInvalidToken, "service.CreateClient() should return ErrorInvalidToken error")
+		require.Nil(t, got, "service.CreateClient() should return nil data on error")
+	})
+
+	t.Run("Create client with email", func(t *testing.T) {
+		service := &Ctd{}
+		service.Init(url, token)
+
+		email := faker.Email()
+		nickname := faker.Name()
+
+		got, err := service.CreateClient(ctx, email, transport, channel, nickname, "")
+		require.NoError(t, err, "service.CreateClient() should not return an error for email")
+		require.NotNil(t, got, "service.CreateClient() should return data")
+		require.Greater(t, got.ID, 0, "service.CreateClient() should return client with ID")
+
+		t.Run("Create existing client with email", func(t *testing.T) {
+			again, err := service.CreateClient(ctx, email, transport, channel, nickname, "")
+			require.ErrorIs(t, err, ErrorClieantAlreadyExists, "service.CreateClient() should return ErrorClieantAlreadyExists error")
+			require.NotNil(t, again, "service.CreateClient() should return data")
+			require.Equal(t, got.ID, again.ID, "service.CreateClient() should return the ID of the existing client")
+		})
+	})
 }
 
 func TestCtd_CreateClient(t *testing.T) {

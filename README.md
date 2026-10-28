@@ -35,7 +35,7 @@ Get retrieves data from the specified path using a GET request.
 It constructs the full URL by appending the path to the base URL.
 The method sends a GET request to the API and returns the response data as a byte slice.
 If an error occurs during the request, it logs the error and returns it.
-If the request times out, it retries the request once.
+If the request times out, it retries the request once, but only when the Retry option is enabled.
 This method is typically used to fetch data from the Chat2Desk API.
 
 Parameters:
@@ -57,7 +57,7 @@ Post sends data to the specified path using a POST request.
 It constructs the full URL by appending the path to the base URL.
 The method sends a POST request to the API with the provided data and returns the response data as a byte slice.
 If an error occurs during the request, it logs the error and returns it.
-If the request times out, it retries the request once.
+If the request times out, it retries the request once, but only when the Retry option is enabled.
 This method is typically used to send data to the Chat2Desk API.
 
 Parameters:
@@ -80,7 +80,7 @@ Put sends data to the specified path using a PUT request.
 It constructs the full URL by appending the path to the base URL.
 The method sends a PUT request to the API with the provided data and returns the response data as a byte slice.
 If an error occurs during the request, it logs the error and returns it.
-If the request times out, it retries the request once.
+If the request times out, it retries the request once, but only when the Retry option is enabled.
 This method is typically used to update data in the Chat2Desk API.
 
 Parameters:
@@ -103,7 +103,7 @@ Delete sends a DELETE request to the specified path.
 It constructs the full URL by appending the path to the base URL.
 The method sends a DELETE request to the API and returns the response data as a byte slice.
 If an error occurs during the request, it logs the error and returns it.
-If the request times out, it retries the request once.
+If the request times out, it retries the request once, but only when the Retry option is enabled.
 This method is typically used to delete data from the Chat2Desk API.
 
 Parameters:
@@ -140,18 +140,6 @@ Returns:
   - An error if the request fails, if the response is invalid, or if the response indicates an invalid token.
 </details>
 
-```func (*Ctd).LastError() any```
-
-<details>
-<summary>Function description</summary>
-
-LastError returns the last error encountered during API requests.
-This method is useful for retrieving the last error that occurred,
-allowing for error handling or logging in the application.
-
-Returns:
-  - The last error encountered during API requests, or nil if no error occurred.
-</details>
 
 </details>
 

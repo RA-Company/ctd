@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -44,6 +46,32 @@ type MetaResponse struct {
 	Offset int `json:"offset"`
 }
 
+// APIErrors is the "errors" field of a response. Depending on the endpoint the API returns it as a string,
+// an object, an array or null, so the value is kept as text: strings are unquoted, anything else is kept as raw JSON.
+type APIErrors string
+
+func (dst *APIErrors) UnmarshalJSON(data []byte) error {
+	raw := strings.TrimSpace(string(data))
+	switch {
+	case raw == "" || raw == "null":
+		*dst = ""
+	case raw[0] == '"':
+		var str string
+		if err := json.Unmarshal(data, &str); err != nil {
+			return err
+		}
+		*dst = APIErrors(str)
+	default:
+		*dst = APIErrors(raw)
+	}
+
+	return nil
+}
+
+func (dst APIErrors) String() string {
+	return string(dst)
+}
+
 type BasicResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
@@ -51,10 +79,10 @@ type BasicResponse struct {
 }
 type Ctd struct {
 	logging.CustomLogger
-	Url       string
-	Token     string
-	Timeout   uint
-	lastError any // Last error encountered during API requests
+	Url     string
+	Token   string
+	Timeout uint
+	Retry   bool // Retry: repeat a request once if it times out (disabled by default, may duplicate non-idempotent requests)
 }
 
 // Init initializes the Ctd instance with the provided URL and token.
@@ -68,10 +96,9 @@ type Ctd struct {
 //   - url: The base URL of the Chat2Desk API, which should end with a slash.
 //   - token: The authentication token for the Chat2Desk API, used
 func (dst *Ctd) Init(url string, token string) {
-	if url[len(url)-1:] != "/" {
+	dst.Url = url
+	if url != "" && !strings.HasSuffix(url, "/") {
 		dst.Url = url + "/"
-	} else {
-		dst.Url = url
 	}
 
 	dst.Token = token
@@ -82,7 +109,7 @@ func (dst *Ctd) Init(url string, token string) {
 // It constructs the full URL by appending the path to the base URL.
 // The method sends a GET request to the API and returns the response data as a byte slice.
 // If an error occurs during the request, it logs the error and returns it.
-// If the request times out, it retries the request once.
+// If the request times out, it retries the request once, but only when the Retry option is enabled.
 // This method is typically used to fetch data from the Chat2Desk API.
 //
 // Parameters:
@@ -96,20 +123,14 @@ func (dst *Ctd) Init(url string, token string) {
 func (dst *Ctd) Get(ctx context.Context, path string, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "GET", url, nil, response)
-	if err != nil {
-		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "GET", url, nil, response)
-		}
-	}
-	return result, err
+	return dst.doRequestRetry(ctx, "GET", url, nil, response)
 }
 
 // Post sends data to the specified path using a POST request.
 // It constructs the full URL by appending the path to the base URL.
 // The method sends a POST request to the API with the provided data and returns the response data as a byte slice.
 // If an error occurs during the request, it logs the error and returns it.
-// If the request times out, it retries the request once.
+// If the request times out, it retries the request once, but only when the Retry option is enabled.
 // This method is typically used to send data to the Chat2Desk API.
 //
 // Parameters:
@@ -124,20 +145,14 @@ func (dst *Ctd) Get(ctx context.Context, path string, response any) ([]byte, err
 func (dst *Ctd) Post(ctx context.Context, path string, data any, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "POST", url, data, response)
-	if err != nil {
-		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "POST", url, data, response)
-		}
-	}
-	return result, err
+	return dst.doRequestRetry(ctx, "POST", url, data, response)
 }
 
 // Put sends data to the specified path using a PUT request.
 // It constructs the full URL by appending the path to the base URL.
 // The method sends a PUT request to the API with the provided data and returns the response data as a byte slice.
 // If an error occurs during the request, it logs the error and returns it.
-// If the request times out, it retries the request once.
+// If the request times out, it retries the request once, but only when the Retry option is enabled.
 // This method is typically used to update data in the Chat2Desk API.
 //
 // Parameters:
@@ -152,20 +167,14 @@ func (dst *Ctd) Post(ctx context.Context, path string, data any, response any) (
 func (dst *Ctd) Put(ctx context.Context, path string, data any, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "PUT", url, data, response)
-	if err != nil {
-		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "PUT", url, data, response)
-		}
-	}
-	return result, err
+	return dst.doRequestRetry(ctx, "PUT", url, data, response)
 }
 
 // Delete sends a DELETE request to the specified path.
 // It constructs the full URL by appending the path to the base URL.
 // The method sends a DELETE request to the API and returns the response data as a byte slice.
 // If an error occurs during the request, it logs the error and returns it.
-// If the request times out, it retries the request once.
+// If the request times out, it retries the request once, but only when the Retry option is enabled.
 // This method is typically used to delete data from the Chat2Desk API.
 //
 // Parameters:
@@ -179,13 +188,26 @@ func (dst *Ctd) Put(ctx context.Context, path string, data any, response any) ([
 func (dst *Ctd) Delete(ctx context.Context, path string, response any) ([]byte, error) {
 	url := dst.Url + path
 
-	result, err := dst.doRequest(ctx, "DELETE", url, nil, response)
-	if err != nil {
-		if strings.Contains(err.Error(), "Client.Timeout exceeded") {
-			result, err = dst.doRequest(ctx, "DELETE", url, nil, response)
-		}
+	return dst.doRequestRetry(ctx, "DELETE", url, nil, response)
+}
+
+// doRequestRetry performs the request via doRequest. If the Retry option is enabled
+// and the request failed because of a timeout, the request is repeated once.
+func (dst *Ctd) doRequestRetry(ctx context.Context, method string, url string, payload any, response any) ([]byte, error) {
+	result, err := dst.doRequest(ctx, method, url, payload, response)
+	if err != nil && dst.Retry && ctx.Err() == nil && isTimeout(err) {
+		result, err = dst.doRequest(ctx, method, url, payload, response)
 	}
 	return result, err
+}
+
+// isTimeout reports whether err is caused by a request timeout.
+func isTimeout(err error) bool {
+	var netErr net.Error
+	if errors.As(err, &netErr) && netErr.Timeout() {
+		return true
+	}
+	return strings.Contains(err.Error(), "Client.Timeout exceeded")
 }
 
 // doRequest performs an HTTP request with the specified method, URL, and payload.
@@ -214,7 +236,7 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 	var req *http.Request
 	var err error
 	if payload == nil {
-		req, err = http.NewRequest(method, url, nil)
+		req, err = http.NewRequestWithContext(ctx, method, url, nil)
 	} else {
 		var data []byte
 		switch v := payload.(type) {
@@ -223,9 +245,13 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 		case []byte:
 			data = v
 		default:
-			data, _ = json.Marshal(v)
+			data, err = json.Marshal(v)
+			if err != nil {
+				dst.Errorf(ctx, "Failed to marshal request: %v", err)
+				return nil, fmt.Errorf("failed to marshal request: %w", err)
+			}
 		}
-		req, err = http.NewRequest(method, url, bytes.NewBuffer(data))
+		req, err = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(data))
 	}
 	if err != nil {
 		dst.Error(ctx, fmt.Sprintf("%v", err))
@@ -256,23 +282,24 @@ func (dst *Ctd) doRequest(ctx context.Context, method string, url string, payloa
 		return nil, ErrorInvalidToken
 	}
 
+	// Chat2Desk reports business errors in a JSON body with a 4xx status, so only a server failure is treated as an error here.
+	serverFailure := fmt.Errorf("%w: HTTP %d", ErrorInvalidResponse, res.StatusCode)
+
+	if response == nil && res.StatusCode >= http.StatusInternalServerError {
+		dst.Errorf(ctx, "Server error (HTTP %d): %s", res.StatusCode, body)
+		return body, serverFailure
+	}
+
 	if response != nil {
 		err = json.Unmarshal(body, response)
 		if err != nil {
-			dst.Errorf(ctx, "Failed to unmarshal response (%s): %v", body, err)
+			dst.Errorf(ctx, "Failed to unmarshal response (HTTP %d, %s): %v", res.StatusCode, body, err)
+			if res.StatusCode >= http.StatusInternalServerError {
+				return body, serverFailure
+			}
 			return body, ErrorInvalidResponse
 		}
 	}
 
 	return body, nil
-}
-
-// LastError returns the last error encountered during API requests.
-// This method is useful for retrieving the last error that occurred,
-// allowing for error handling or logging in the application.
-//
-// Returns:
-//   - The last error encountered during API requests, or nil if no error occurred.
-func (dst *Ctd) LastError() any {
-	return dst.lastError
 }

@@ -101,7 +101,7 @@ func (dst *Ctd) APISendMessage(ctx context.Context, message *MessagePayload) (*S
 	}
 
 	if _, err := dst.doRequest(ctx, "POST", url, message, &response); err != nil {
-		dst.Error(ctx, "Failed send message: %v", err)
+		dst.Errorf(ctx, "Failed send message: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -125,7 +125,7 @@ func (dst *Ctd) APITransferToGroup(ctx context.Context, message_id, group_id int
 
 	data, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed transfer message to group: %v", err)
+		dst.Errorf(ctx, "Failed transfer message to group: %v", err)
 		return nil, err
 	}
 
@@ -158,7 +158,7 @@ func (dst *Ctd) APITransferToOperator(ctx context.Context, message_id, operator_
 
 	data, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed transfer message to operator: %v", err)
+		dst.Errorf(ctx, "Failed transfer message to operator: %v", err)
 		return nil, err
 	}
 
@@ -191,7 +191,7 @@ func (dst *Ctd) SendMessage(ctx context.Context, message *MessagePayload) (*Send
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to send message: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to send message: %v", data.Errors)
 		return nil, ErrorInvalidParameters
 	}
 
@@ -216,7 +216,7 @@ func (dst *Ctd) TransferToGroup(ctx context.Context, message_id, group_id int64,
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to transfer message to group: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to transfer message to group: %v", data.Errors)
 		return ErrorInvalidParameters
 	}
 
@@ -240,7 +240,7 @@ func (dst *Ctd) TransferToOperator(ctx context.Context, message_id, operator_id 
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to transfer message to operator: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to transfer message to operator: %v", data.Errors)
 		return ErrorInvalidParameters
 	}
 

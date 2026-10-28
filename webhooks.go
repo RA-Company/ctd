@@ -73,9 +73,9 @@ func (dst *CreateWebhookResponse) Postprocess() error {
 // when deleting a webhook. It includes a status message and optional fields
 // for additional information and errors.
 type DeleteWebhookResponse struct {
-	Status  string `json:"status"`            // Status: Status of the delete operation
-	Message string `json:"message,omitempty"` // Message: Optional message providing additional information
-	Errors  string `json:"errors,omitempty"`  // Errors: Optional field containing errors related to the delete operation
+	Status  string    `json:"status"`            // Status: Status of the delete operation
+	Message string    `json:"message,omitempty"` // Message: Optional message providing additional information
+	Errors  APIErrors `json:"errors,omitempty"`  // Errors: Optional field containing errors related to the delete operation
 }
 
 // Webhook represents a single webhook in the Chat2Desk API
@@ -147,7 +147,7 @@ func (dst *Ctd) Webhooks(ctx context.Context) (*WebhooksResponse, error) {
 
 	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to get webhooks: %v", err)
+		dst.Errorf(ctx, "Failed to get webhooks: %v", err)
 		return nil, err
 	}
 
@@ -177,7 +177,7 @@ func (dst *Ctd) PostWebhooks(ctx context.Context, payload *WebhookPayload) (*Cre
 
 	_, err := dst.doRequest(ctx, "POST", url, payload, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to create webhook: %v", err)
+		dst.Errorf(ctx, "Failed to create webhook: %v", err)
 		return nil, err
 	}
 
@@ -208,7 +208,7 @@ func (dst *Ctd) PutWebhooks(ctx context.Context, id int, payload *WebhookPayload
 
 	_, err := dst.doRequest(ctx, "PUT", url, payload, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to update webhook: %v", err)
+		dst.Errorf(ctx, "Failed to update webhook: %v", err)
 		return nil, err
 	}
 
@@ -235,7 +235,7 @@ func (dst *Ctd) DeleteWebhooks(ctx context.Context, id int) (*DeleteWebhookRespo
 	response := DeleteWebhookResponse{}
 	_, err := dst.doRequest(ctx, "DELETE", url, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to delete webhook: %v", err)
+		dst.Errorf(ctx, "Failed to delete webhook: %v", err)
 		return nil, err
 	}
 
@@ -263,7 +263,7 @@ func (dst *Ctd) GetWebhooks(ctx context.Context) ([]Webhook, error) {
 	}
 
 	if response.Status != "success" {
-		dst.Error(ctx, "Failed to get webhooks: %s", response.Status)
+		dst.Errorf(ctx, "Failed to get webhooks: %s", response.Status)
 		return nil, ErrorInvalidResponse
 	}
 
@@ -292,7 +292,7 @@ func (dst *Ctd) CreateWebhook(ctx context.Context, payload *WebhookPayload) (*We
 	}
 
 	if err := response.Postprocess(); err != nil {
-		dst.Error(ctx, "Failed to create webhook: %+v", response.Error())
+		dst.Errorf(ctx, "Failed to create webhook: %+v", response.Error())
 		return nil, err
 	}
 
@@ -322,7 +322,7 @@ func (dst *Ctd) UpdateWebhook(ctx context.Context, id int, payload *WebhookPaylo
 	}
 
 	if err := response.Postprocess(); err != nil {
-		dst.Error(ctx, "Failed to update webhook: %v", response.Error())
+		dst.Errorf(ctx, "Failed to update webhook: %v", response.Error())
 		return nil, err
 	}
 
@@ -349,7 +349,7 @@ func (dst *Ctd) DeleteWebhook(ctx context.Context, id int) error {
 	}
 
 	if response.Status != "success" {
-		dst.Error(ctx, "Failed to delete webhook: %s", response.Errors)
+		dst.Errorf(ctx, "Failed to delete webhook: %v", response.Errors)
 		return ErrorInvalidID
 	}
 

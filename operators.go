@@ -86,7 +86,7 @@ func (dst *Ctd) APIOperators(ctx context.Context, offset int, limit int) (*Opera
 	response := OperatorsResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed to get operators: %v", err)
+		dst.Errorf(ctx, "Failed to get operators: %v", err)
 		return nil, err
 	}
 
@@ -111,7 +111,7 @@ func (dst *Ctd) APIOperatorStatuses(ctx context.Context) ([]OperatorStatus, erro
 	response := []OperatorStatus{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed to get operator statuses: %v", err)
+		dst.Errorf(ctx, "Failed to get operator statuses: %v", err)
 		return nil, err
 	}
 
@@ -139,8 +139,8 @@ func (dst *Ctd) Operators(ctx context.Context, offset int, limit int) ([]Operato
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to get operators: %s", data.Errors)
-		return nil, 0, fmt.Errorf("failed to get operators: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to get operators: %v", data.Errors)
+		return nil, 0, fmt.Errorf("failed to get operators: %v", data.Errors)
 	}
 
 	return data.Data, data.Meta.Total, nil

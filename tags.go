@@ -12,15 +12,15 @@ type TagsResponse struct {
 	Data    []Tag        `json:"data"`             // Data: List of tags
 	Meta    MetaResponse `json:"meta"`             // Meta: Metadata about the response
 	Message string       `json:"message"`          // Message: Additional message from the API
-	Errors  string       `json:"errors,omitempty"` // Errors: List of errors, if any
+	Errors  APIErrors    `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // MetaResponse contains metadata about the API response.
 type TagResponse struct {
-	Status  string `json:"status"`           // Status: Status of the response
-	Data    Tag    `json:"data"`             // Data: The tag item
-	Message string `json:"message"`          // Message: Additional message from the API
-	Errors  string `json:"errors,omitempty"` // Errors: List of errors, if any
+	Status  string    `json:"status"`           // Status: Status of the response
+	Data    Tag       `json:"data"`             // Data: The tag item
+	Message string    `json:"message"`          // Message: Additional message from the API
+	Errors  APIErrors `json:"errors,omitempty"` // Errors: List of errors, if any
 }
 
 // MetaResponse contains metadata about the API response.
@@ -50,7 +50,7 @@ func (dest *Ctd) APIGetTags(ctx context.Context, offset, limit int) (*TagsRespon
 	response := TagsResponse{}
 	_, err := dest.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dest.Error(ctx, "Failed to get tags: %v", err)
+		dest.Errorf(ctx, "Failed to get tags: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -73,7 +73,7 @@ func (dest *Ctd) APIGetTag(ctx context.Context, id int64) (*TagResponse, error) 
 	response := TagResponse{}
 	_, err := dest.doRequest(ctx, "GET", url, nil, &response)
 	if err != nil {
-		dest.Error(ctx, "Failed to get tag: %v", err)
+		dest.Errorf(ctx, "Failed to get tag: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -111,7 +111,7 @@ func (dest *Ctd) APIAssignTag(ctx context.Context, tag_ids []int64, mode string,
 	response := BasicResponse{}
 	data, err := dest.doRequest(ctx, "POST", url, payload, &response)
 	if err != nil {
-		dest.Error(ctx, "Failed to assign tag: %v", err)
+		dest.Errorf(ctx, "Failed to assign tag: %v", err)
 		return nil, err
 	}
 
@@ -152,7 +152,7 @@ func (dest *Ctd) APIRemoveTagFrom(ctx context.Context, tag_id int64, mode string
 	response := BasicResponse{}
 	data, err := dest.doRequest(ctx, "DELETE", url, payload, &response)
 	if err != nil {
-		dest.Error(ctx, "Failed to remove tag: %v", err)
+		dest.Errorf(ctx, "Failed to remove tag: %v", err)
 		return nil, err
 	}
 
@@ -201,7 +201,8 @@ func (dest *Ctd) GetTags(ctx context.Context, offset, limit int) ([]Tag, int, er
 	}
 
 	if response.Status != "success" {
-		return nil, 0, nil
+		dest.Errorf(ctx, "Failed to get tags: %v", response.Errors)
+		return nil, 0, ErrorInvalidResponse
 	}
 
 	return response.Data, response.Meta.Total, nil
@@ -225,7 +226,7 @@ func (dest *Ctd) GetTag(ctx context.Context, id int64) (*Tag, error) {
 		return nil, err
 	}
 
-	if strings.Contains(response.Errors, " not found") {
+	if strings.Contains(response.Errors.String(), " not found") {
 		return nil, ErrorInvalidID
 	}
 

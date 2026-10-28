@@ -89,13 +89,11 @@ func (dst *Ctd) APIStatisticsRating(ctx context.Context, date time.Time, offset,
 	}
 
 	url := fmt.Sprintf("%sv1/statistics?report=rating&date=%s&offset=%d&limit=%d", dst.Url, date.Format("2006-01-02"), offset, limit)
-	timeout := dst.Timeout
-	defer func() { dst.Timeout = timeout }()
 
 	response := StatisticsRatingResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed to get statistics: %v", err)
+		dst.Errorf(ctx, "Failed to get statistics: %v", err)
 		return nil, err
 	}
 
@@ -123,11 +121,9 @@ func (dst *Ctd) StatisticsRating(ctx context.Context, date time.Time, offset int
 		return nil, 0, err
 	}
 
-	fmt.Printf("StatisticsRating: %+v\n", data)
-
 	if data.Status == "error" {
-		dst.Error(ctx, "Failed to get statistics: %s", data.Errors)
-		return nil, 0, fmt.Errorf("failed to get statistics: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to get statistics: %v", data.Errors)
+		return nil, 0, fmt.Errorf("failed to get statistics: %v", data.Errors)
 	}
 
 	return data.Data, data.Meta.Total, nil

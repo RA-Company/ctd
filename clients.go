@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/ra-company/logging"
@@ -21,7 +22,7 @@ type ClientsResponse struct {
 	Data    []Client     `json:"data"` // Data: List of clients
 	Meta    MetaResponse `json:"meta"`
 	Message string       `json:"message"`
-	Errors  string       `json:"errors,omitempty"` // Errors: List of errors,
+	Errors  APIErrors    `json:"errors,omitempty"` // Errors: List of errors,
 	Status  string       `json:"status"`
 }
 
@@ -46,10 +47,62 @@ type Client struct {
 	ExtraComment3         string                     `json:"extra_comment_3"`      // ExtraComment3: Third extra comment associated with the client
 	CustomFields          map[string]json.RawMessage `json:"custom_fields"`        // CustomFields: Map of custom fields associated with the client
 	ClientExternalID      string                     `json:"client_external_id"`   // ClientExternalID: External ID of the client
-	ExtrnalID             int                        `json:"external_id"`          // ExternalID: External ID of the client
-	ExtrnalIDs            map[string]int             `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client
+	ExtrnalID             string                     `json:"external_id"`          // ExternalID: External ID of the client (the API returns either a string or a number)
+	ExtrnalIDs            map[string]string          `json:"external_ids"`         // ExternalIDs: Map of external IDs associated with the client (the API returns each value either as a string or as a number)
 	Channels              []Channel                  `json:"channels"`             // Channels: List of channels associated with the client
 	Tags                  []Tag                      `json:"tags"`                 // Tags: List of tags associated with the client
+}
+
+// UnmarshalJSON decodes a client, accepting external_id and the values of external_ids
+// as either a JSON string or a number. A null value results in an empty string.
+func (dst *Client) UnmarshalJSON(data []byte) error {
+	type plain Client
+	aux := struct {
+		*plain
+		ExtrnalID  json.RawMessage            `json:"external_id"`
+		ExtrnalIDs map[string]json.RawMessage `json:"external_ids"`
+	}{plain: (*plain)(dst)}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	var err error
+	if dst.ExtrnalID, err = externalIDString(aux.ExtrnalID); err != nil {
+		return err
+	}
+
+	dst.ExtrnalIDs = nil
+	if aux.ExtrnalIDs != nil {
+		dst.ExtrnalIDs = make(map[string]string, len(aux.ExtrnalIDs))
+		for key, raw := range aux.ExtrnalIDs {
+			if dst.ExtrnalIDs[key], err = externalIDString(raw); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// externalIDString converts a JSON string, number or null to a string.
+func externalIDString(data json.RawMessage) (string, error) {
+	raw := strings.TrimSpace(string(data))
+	switch {
+	case raw == "" || raw == "null":
+		return "", nil
+	case raw[0] == '"':
+		var str string
+		err := json.Unmarshal(data, &str)
+		return str, err
+	}
+
+	var number json.Number
+	if err := json.Unmarshal(data, &number); err != nil {
+		return "", err
+	}
+
+	return number.String(), nil
 }
 
 // APIGetClient retrieves a client by its ID from the Chat2Desk API.
@@ -70,7 +123,7 @@ func (dst *Ctd) APIGetClient(ctx context.Context, id int) (*ClientResponse, erro
 	url := fmt.Sprintf("%sv1/clients/%d", dst.Url, id)
 	response := ClientResponse{}
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed to get client: %v", err)
+		dst.Errorf(ctx, "Failed to get client: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -90,7 +143,7 @@ func (dst *Ctd) APIGetClient(ctx context.Context, id int) (*ClientResponse, erro
 //   - offset: The offset for pagination, indicating where to start fetching clients.
 //   - limit: The maximum number of clients to return.
 //   - order: The sorting order for the clients (e.g., "asc", "desc").
-//   - params: Additional query parameters to include in the request.
+//   - params: Additional query parameters to include in the request, e.g. "phone=123&tag_id=5". The values are re-encoded, so they may be passed unescaped.
 //
 // Returns:
 //   - A pointer to a ClientResponse struct containing the list of clients and metadata.
@@ -101,13 +154,18 @@ func (dst *Ctd) APIGetClients(ctx context.Context, offset, limit int, order, par
 		order = "asc"
 	}
 	if params != "" {
-		params = "&" + params
+		query, err := url.ParseQuery(strings.TrimLeft(params, "?&"))
+		if err != nil {
+			dst.Errorf(ctx, "Invalid clients query parameters %q: %v", params, err)
+			return nil, ErrorInvalidParameters
+		}
+		params = "&" + query.Encode()
 	}
-	url := fmt.Sprintf("%sv1/clients?offset=%d&limit=%d&order=%s%s", dst.Url, offset, limit, order, params)
+	endpoint := fmt.Sprintf("%sv1/clients?offset=%d&limit=%d&order=%s%s", dst.Url, offset, limit, order, params)
 	response := ClientsResponse{}
-	_, err := dst.doRequest(ctx, "GET", url, nil, &response)
+	_, err := dst.doRequest(ctx, "GET", endpoint, nil, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to get clients: %v", err)
+		dst.Errorf(ctx, "Failed to get clients: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -149,7 +207,7 @@ func (dst *Ctd) APICreateClient(ctx context.Context, phone, transport string, ch
 	response := ClientResponse{}
 	_, err := dst.doRequest(ctx, "POST", url, data, &response)
 	if err != nil {
-		dst.Error(ctx, "Failed to create client: %v", err)
+		dst.Errorf(ctx, "Failed to create client: %v", err)
 		return nil, err
 	}
 
@@ -289,6 +347,10 @@ func (dst *Ctd) createClientExists(ctx context.Context, result json.RawMessage) 
 	var inner struct {
 		ID int64 `json:"id"`
 	}
+	if len(outer["client"]) < 2 {
+		return 0, ErrorInvalidResponse
+	}
+
 	if err := json.Unmarshal([]byte(outer["client"][1]), &inner); err != nil {
 		return 0, err
 	}

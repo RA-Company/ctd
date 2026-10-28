@@ -33,7 +33,7 @@ func (dst *Ctd) APIOperatorGroups(ctx context.Context) (*OperatorGroupsResponse,
 	response := OperatorGroupsResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed send message: %v", err)
+		dst.Errorf(ctx, "Failed send message: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -57,7 +57,7 @@ func (dst *Ctd) OperatorGroups(ctx context.Context) ([]OperatorGroup, error) {
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to get operator groups: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to get operator groups: %v", data.Errors)
 		return nil, ErrorInvalidParameters
 	}
 

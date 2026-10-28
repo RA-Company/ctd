@@ -83,7 +83,7 @@ func (dst *Ctd) APIGetDialogs(ctx context.Context, params *GetDialogsParams) (*D
 	response := DialogsResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed get dialogs: %v", err)
+		dst.Errorf(ctx, "Failed get dialogs: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -104,7 +104,7 @@ func (dst *Ctd) APIGetDialog(ctx context.Context, dialog_id int64) (*DialogRespo
 	response := DialogResponse{}
 
 	if _, err := dst.doRequest(ctx, "GET", url, nil, &response); err != nil {
-		dst.Error(ctx, "Failed get dialog by ID: %v", err)
+		dst.Errorf(ctx, "Failed get dialog by ID: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -134,7 +134,7 @@ func (dst *Ctd) APICloseDialog(ctx context.Context, dialog_id, opertor_id, initi
 	response := BasicResponse{}
 
 	if _, err := dst.doRequest(ctx, "PUT", url, payload, &response); err != nil {
-		dst.Error(ctx, "Failed close dialog by ID: %v", err)
+		dst.Errorf(ctx, "Failed close dialog by ID: %v", err)
 		return nil, err
 	}
 	return &response, nil
@@ -158,7 +158,7 @@ func (dst *Ctd) GetDialogs(ctx context.Context, params *GetDialogsParams) ([]Dia
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to get dialogs: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to get dialogs: %v", data.Errors)
 		return nil, 0, ErrorInvalidParameters
 	}
 
@@ -182,7 +182,7 @@ func (dst *Ctd) GetDialog(ctx context.Context, dialog_id int64) (*Dialog, error)
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to get dialog by ID: %s", data.Errors)
+		dst.Errorf(ctx, "Failed to get dialog by ID: %v", data.Errors)
 		if data.Message == "not_found" {
 			return nil, ErrorInvalidID
 		}
@@ -210,8 +210,8 @@ func (dst *Ctd) CloseDialog(ctx context.Context, dialog_id, opertor_id, initiato
 	}
 
 	if data.Status != "success" {
-		dst.Error(ctx, "Failed to close dialog by ID: %s", data.Errors)
-		if strings.Contains(fmt.Sprintf("%s", data.Errors), "already has state") {
+		dst.Errorf(ctx, "Failed to close dialog by ID: %v", data.Errors)
+		if strings.Contains(fmt.Sprintf("%v", data.Errors), "already has state") {
 			return ErrorDialogClosed
 		}
 		return ErrorInvalidParameters
